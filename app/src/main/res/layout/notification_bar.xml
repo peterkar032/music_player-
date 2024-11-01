@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.music"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="451dp"
+        android:layout_height="163dp"
+        app:srcCompat="@drawable/music"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="1dp"
+        tools:layout_editor_absoluteY="247dp" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="PLAY"
+        app:icon="@drawable/play"
+        tools:layout_editor_absoluteX="1dp"
+        tools:layout_editor_absoluteY="417dp"
+        tools:ignore="MissingConstraints" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="PAUSE"
+        app:icon="@drawable/pause"
+        tools:layout_editor_absoluteX="110dp"
+        tools:layout_editor_absoluteY="417dp"
+        tools:ignore="MissingConstraints" />
+
+    <Button
+        android:id="@+id/button3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="PREV"
+        app:icon="@drawable/prev"
+        tools:layout_editor_absoluteX="230dp"
+        tools:layout_editor_absoluteY="417dp"
+        tools:ignore="MissingConstraints" />
+
+    <Button
+        android:id="@+id/button4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="NEXT"
+        app:icon="@drawable/next"
+        tools:layout_editor_absoluteX="340dp"
+        tools:layout_editor_absoluteY="417dp"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/nottxextsongtitle"
+        android:layout_width="91dp"
+        android:layout_height="22dp"
+        android:text="Song Title"
+        tools:layout_editor_absoluteX="1dp"
+        tools:layout_editor_absoluteY="213dp"
+        tools:ignore="MissingConstraints" />
+</androidx.constraintlayout.widget.ConstraintLayout>

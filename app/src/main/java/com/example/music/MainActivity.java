@@ -15,6 +15,7 @@ import androidx.core.view.WindowInsetsCompat;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import android.content.Intent;
 
 public class MainActivity extends AppCompatActivity {
     private MediaPlayer mediaPlayer;
@@ -52,18 +53,36 @@ public class MainActivity extends AppCompatActivity {
 
         // Ρύθμιση listeners
         btnPlayPause.setOnClickListener(v -> {
+            Intent serviceIntent = new Intent(MainActivity.this, MediaService.class);
             if (isPlaying) {
                 btnPlayPause.setText("PLAY");
-                pauseMusic();
+                serviceIntent.setAction("PAUSE");
+                startService(serviceIntent); // Pause the service
             } else {
                 btnPlayPause.setText("PAUSE");
-                playMusic();
+                serviceIntent.setAction("PLAY");
+                startService(serviceIntent); // Start the service
             }
-            isPlaying = !isPlaying; // Εναλλαγή κατάστασης αναπαραγωγής
+            startService(serviceIntent); // Always start the service
+            isPlaying = !isPlaying; // Toggle play/pause state
         });
 
-        btnNext.setOnClickListener(v -> nextTrack());
-        btnPrevious.setOnClickListener(v -> previousTrack());
+        btnNext.setOnClickListener(v -> {
+            Intent serviceIntent = new Intent(MainActivity.this, MediaService.class);
+            serviceIntent.setAction("NEXT");
+            startService(serviceIntent);
+            nextTrack(); // Update local track index
+        });
+
+        btnPrevious.setOnClickListener(v -> {
+            Intent serviceIntent = new Intent(MainActivity.this, MediaService.class);
+            serviceIntent.setAction("PREVIOUS");
+            startService(serviceIntent);
+            previousTrack(); // Update local track index
+        });
+
+        updateSongTitle(); // Initial title update
+
     }
 
     private void loadTracks() {
