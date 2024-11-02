@@ -1,5 +1,7 @@
 package com.example.music;
 
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.media.MediaPlayer;
@@ -18,13 +20,16 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class MainActivity extends AppCompatActivity {
     private MediaPlayer mediaPlayer;
     private boolean isPlaying = false; // Κατάσταση αναπαραγωγής/παύσης
     private int currentTrackIndex = 0; // Τρέχον κομμάτι
     private List<Integer> recycleList = new ArrayList<>(); // Λίστα τραγουδιών
     private List<String> trackTitles = new ArrayList<>(); // Λίστα τίτλων τραγουδιών
-    private ListView trackListView;
+
+    private RecyclerView recyclerView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,11 +61,10 @@ public class MainActivity extends AppCompatActivity {
         Button btnPlayPause = findViewById(R.id.PlayButton);
         Button btnNext = findViewById(R.id.NextButton);
         Button btnPrevious = findViewById(R.id.PrevButton);
-        TextView songTitleTextView = findViewById(R.id.SongTitle); // Αναφορά στο TextView τίτλου τραγουδιού
 
         // Αναφορά στο ListView και ρύθμιση της λίστας τραγουδιών
-        trackListView = findViewById(R.id.recycler_view);
-        setupTrackListView();
+        recyclerView = findViewById(R.id.recycler_view);
+        setupRecyclerView();
 
         // Ρύθμιση listeners
         btnPlayPause.setOnClickListener(v -> {
@@ -77,32 +81,28 @@ public class MainActivity extends AppCompatActivity {
         btnNext.setOnClickListener(v -> nextTrack());
         btnPrevious.setOnClickListener(v -> previousTrack());
     }
+    private void setupRecyclerView() {
+    TrackAdapter adapter = new TrackAdapter(trackTitles, position -> {
+        currentTrackIndex = position;
+        initializeMediaPlayer();
+        playMusic();
+    });
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(adapter);
+}
 
-    private void setupTrackListView() {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, trackTitles);
-        trackListView.setAdapter(adapter);
-
-        trackListView.setOnItemClickListener((parent, view, position, id) -> {
-            currentTrackIndex = position;
-            initializeMediaPlayer();
-            playMusic();
-        });
-    }
-
-    private void loadTracks() {
-        // Χρήση reflection για την ανάκτηση όλων των μουσικών αρχείων από το φάκελο raw
-        Field[] fields = R.raw.class.getFields();
-        for (Field field : fields) {
-            try {
-                int resId = field.getInt(null);
-                recycleList.add(resId);
-                // Προσθέστε τον τίτλο του τραγουδιού στη λίστα (προσαρμόστε τους τίτλους όπως χρειάζεται)
-                trackTitles.add(field.getName().replace("_", " "));
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
+private void loadTracks() {
+    Field[] fields = R.raw.class.getFields();
+    for (Field field : fields) {
+        try {
+            int resId = field.getInt(null);
+            recycleList.add(resId);
+            trackTitles.add(field.getName().replace("_", " "));
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
         }
     }
+}
 
     private void initializeMediaPlayer() {
         if (mediaPlayer != null) {
