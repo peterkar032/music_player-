@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TrackLoader {
-    private List<Integer> trackList;  // Λίστα με τα resource IDs των τραγουδιών
+    private List<Integer> recycleList;  // Λίστα με τα resource IDs των τραγουδιών
     private List<String> trackTitles; // Λίστα με τους τίτλους των τραγουδιών
 
     public TrackLoader(Context context) {
-        trackList = new ArrayList<>();
+        recycleList = new ArrayList<>();
         trackTitles = new ArrayList<>();
         loadTracks(context);
     }
@@ -21,7 +21,7 @@ public class TrackLoader {
         for (Field field : fields) {
             try {
                 int resId = field.getInt(null);
-                trackList.add(resId);
+                recycleList.add(resId);
                 trackTitles.add(field.getName().replace("_", " "));
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
@@ -30,8 +30,8 @@ public class TrackLoader {
     }
 
     // Επιστροφή της λίστας με τα IDs των τραγουδιών
-    public List<Integer> getTrackList() {
-        return trackList;
+    public List<Integer> getRecycleList() {
+        return recycleList;
     }
 
     // Επιστροφή της λίστας με τους τίτλους των τραγουδιών

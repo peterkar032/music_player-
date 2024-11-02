@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
     private MediaPlayer mediaPlayer;
     private boolean isPlaying = false; // Κατάσταση αναπαραγωγής/παύσης
     private int currentTrackIndex = 0; // Τρέχον κομμάτι
-    private List<Integer> trackList = new ArrayList<>(); // Λίστα τραγουδιών
+    private List<Integer> recycleList = new ArrayList<>(); // Λίστα τραγουδιών
     private List<String> trackTitles = new ArrayList<>(); // Λίστα τίτλων τραγουδιών
     private ListView trackListView;
 
@@ -34,13 +34,11 @@ public class MainActivity extends AppCompatActivity {
 
         // Φόρτωση της λίστας τραγουδιών
         TrackLoader trackLoader = new TrackLoader(this);
-        trackList = trackLoader.getTrackList();
+        recycleList = trackLoader.getRecycleList();
         trackTitles = trackLoader.getTrackTitles();
 
         // Φόρτωση κομματιών από τον φάκελο raw
         loadTracks();
-
-
 
         // Ρύθμιση του πρώτου κομματιού
         initializeMediaPlayer();
@@ -61,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
         TextView songTitleTextView = findViewById(R.id.SongTitle); // Αναφορά στο TextView τίτλου τραγουδιού
 
         // Αναφορά στο ListView και ρύθμιση της λίστας τραγουδιών
-        trackListView = findViewById(R.id.trackListView);
+        trackListView = findViewById(R.id.recycler_view);
         setupTrackListView();
 
         // Ρύθμιση listeners
@@ -79,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
         btnNext.setOnClickListener(v -> nextTrack());
         btnPrevious.setOnClickListener(v -> previousTrack());
     }
+
     private void setupTrackListView() {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, trackTitles);
         trackListView.setAdapter(adapter);
@@ -96,9 +95,9 @@ public class MainActivity extends AppCompatActivity {
         for (Field field : fields) {
             try {
                 int resId = field.getInt(null);
-                trackList.add(resId);
+                recycleList.add(resId);
                 // Προσθέστε τον τίτλο του τραγουδιού στη λίστα (προσαρμόστε τους τίτλους όπως χρειάζεται)
-                trackTitles.add(field.getName().replace("_", " ")); // Για παράδειγμα, αν τα ονόματα των αρχείων είναι τα ονόματα των κομματιών
+                trackTitles.add(field.getName().replace("_", " "));
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -110,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
             mediaPlayer.stop();
             mediaPlayer.release();
         }
-        mediaPlayer = MediaPlayer.create(this, trackList.get(currentTrackIndex));
+        mediaPlayer = MediaPlayer.create(this, recycleList.get(currentTrackIndex));
         mediaPlayer.setOnCompletionListener(mp -> nextTrack());
         mediaPlayer.setOnErrorListener((mp, what, extra) -> {
             Toast.makeText(this, "Error occurred during playback", Toast.LENGTH_SHORT).show();
@@ -140,20 +139,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void nextTrack() {
-        currentTrackIndex = (currentTrackIndex + 1) % trackList.size(); // Περιστροφική εναλλαγή
+        currentTrackIndex = (currentTrackIndex + 1) % recycleList.size(); // Περιστροφική εναλλαγή
         initializeMediaPlayer();
         playMusic();
     }
 
     private void previousTrack() {
-        currentTrackIndex = (currentTrackIndex - 1 + trackList.size()) % trackList.size(); // Περιστροφική εναλλαγή
+        currentTrackIndex = (currentTrackIndex - 1 + recycleList.size()) % recycleList.size(); // Περιστροφική εναλλαγή
         initializeMediaPlayer();
         playMusic();
     }
 
     private void updateSongTitle() {
-        TextView songTitleTextView = findViewById(R.id.SongTitle); // Αναφορά στο TextView τίτλου τραγουδιού
-        songTitleTextView.setText(trackTitles.get(currentTrackIndex)); // Ενημέρωση με τον τίτλο του τρέχοντος κομματιού
+        TextView songTitleTextView = findViewById(R.id.SongTitle);
+        songTitleTextView.setText(trackTitles.get(currentTrackIndex));
     }
 
     @Override
