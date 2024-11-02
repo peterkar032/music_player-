@@ -1,5 +1,7 @@
 package com.example.music;
 
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.View;
@@ -22,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
     private int currentTrackIndex = 0; // Τρέχον κομμάτι
     private List<Integer> trackList = new ArrayList<>(); // Λίστα τραγουδιών
     private List<String> trackTitles = new ArrayList<>(); // Λίστα τίτλων τραγουδιών
+    private ListView trackListView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,8 +32,15 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
+        // Φόρτωση της λίστας τραγουδιών
+        TrackLoader trackLoader = new TrackLoader(this);
+        trackList = trackLoader.getTrackList();
+        trackTitles = trackLoader.getTrackTitles();
+
         // Φόρτωση κομματιών από τον φάκελο raw
         loadTracks();
+
+
 
         // Ρύθμιση του πρώτου κομματιού
         initializeMediaPlayer();
@@ -50,6 +60,10 @@ public class MainActivity extends AppCompatActivity {
         Button btnPrevious = findViewById(R.id.PrevButton);
         TextView songTitleTextView = findViewById(R.id.SongTitle); // Αναφορά στο TextView τίτλου τραγουδιού
 
+        // Αναφορά στο ListView και ρύθμιση της λίστας τραγουδιών
+        trackListView = findViewById(R.id.trackListView);
+        setupTrackListView();
+
         // Ρύθμιση listeners
         btnPlayPause.setOnClickListener(v -> {
             if (isPlaying) {
@@ -64,6 +78,16 @@ public class MainActivity extends AppCompatActivity {
 
         btnNext.setOnClickListener(v -> nextTrack());
         btnPrevious.setOnClickListener(v -> previousTrack());
+    }
+    private void setupTrackListView() {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, trackTitles);
+        trackListView.setAdapter(adapter);
+
+        trackListView.setOnItemClickListener((parent, view, position, id) -> {
+            currentTrackIndex = position;
+            initializeMediaPlayer();
+            playMusic();
+        });
     }
 
     private void loadTracks() {
