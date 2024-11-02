@@ -25,11 +25,21 @@ public class MainActivity extends AppCompatActivity {
     private List<Integer> trackList = new ArrayList<>(); // Λίστα τραγουδιών
     private List<String> trackTitles = new ArrayList<>(); // Λίστα τίτλων τραγουδιών
     private SeekBar seekBar;
-    private Runnable updateSeekBar;
+
 
     private android.os.Handler handler = new android.os.Handler();
 
-
+    private final  Runnable updateSeekBar = new Runnable() {
+        @Override
+        public void run() {
+            if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                int currentPosition = mediaPlayer.getCurrentPosition();
+                int duration = mediaPlayer.getDuration();
+                seekBar.setProgress((int) (100.0 * currentPosition / duration));
+                handler.postDelayed(this, 1000);
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
