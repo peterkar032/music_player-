@@ -37,10 +37,9 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        // Φόρτωση της λίστας τραγουδιών
-        TrackLoader trackLoader = new TrackLoader(this);
-        recycleList = trackLoader.getRecycleList();
-        trackTitles = trackLoader.getTrackTitles();
+        // Καθαρίστε τις λίστες πριν την προσθήκη νέων τραγουδιών
+        recycleList.clear();
+        trackTitles.clear();
 
         // Φόρτωση κομματιών από τον φάκελο raw
         loadTracks();
@@ -91,18 +90,24 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 }
 
-private void loadTracks() {
-    Field[] fields = R.raw.class.getFields();
-    for (Field field : fields) {
-        try {
-            int resId = field.getInt(null);
-            recycleList.add(resId);
-            trackTitles.add(field.getName().replace("_", " "));
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+    private void loadTracks() {
+        // Καθαρίστε τη λίστα πριν την προσθήκη των τραγουδιών
+        recycleList.clear();
+        trackTitles.clear();
+
+        // Χρήση reflection για την ανάκτηση όλων των μουσικών αρχείων από το φάκελο raw
+        Field[] fields = R.raw.class.getFields();
+        for (Field field : fields) {
+            try {
+                int resId = field.getInt(null);
+                recycleList.add(resId);
+                // Προσθέστε τον τίτλο του τραγουδιού στη λίστα
+                trackTitles.add(field.getName().replace("_", " "));
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
         }
     }
-}
 
     private void initializeMediaPlayer() {
         if (mediaPlayer != null) {
