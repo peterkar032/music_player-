@@ -55,7 +55,7 @@
             android:src="@drawable/music" />
 
         <SeekBar
-            android:id="@+id/seekBar3"
+            android:id="@+id/seekBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp" />

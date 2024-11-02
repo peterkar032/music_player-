@@ -2,6 +2,8 @@ package com.example.music;
 
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
+import android.widget.SeekBar;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -22,12 +24,21 @@ public class MainActivity extends AppCompatActivity {
     private int currentTrackIndex = 0; // Τρέχον κομμάτι
     private List<Integer> trackList = new ArrayList<>(); // Λίστα τραγουδιών
     private List<String> trackTitles = new ArrayList<>(); // Λίστα τίτλων τραγουδιών
+    private SeekBar seekBar;
+    private Runnable updateSeekBar;
+
+    private android.os.Handler handler = new android.os.Handler();
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        seekBar = findViewById(R.id.seekBar);
+
 
         // Φόρτωση κομματιών από τον φάκελο raw
         loadTracks();
@@ -44,11 +55,32 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+
         // Αναφορά στα κουμπιά
         Button btnPlayPause = findViewById(R.id.PlayButton);
         Button btnNext = findViewById(R.id.NextButton);
         Button btnPrevious = findViewById(R.id.PrevButton);
         TextView songTitleTextView = findViewById(R.id.SongTitle); // Αναφορά στο TextView τίτλου τραγουδιού
+
+        seekBar = findViewById(R.id.seekBar);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && mediaPlayer != null) {
+                    mediaPlayer.seekTo(progress * mediaPlayer.getDuration() / 100);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+
+
+
 
         // Ρύθμιση listeners
         btnPlayPause.setOnClickListener(v -> {
@@ -66,6 +98,7 @@ public class MainActivity extends AppCompatActivity {
         btnPrevious.setOnClickListener(v -> previousTrack());
     }
 
+
     private void loadTracks() {
         // Χρήση reflection για την ανάκτηση όλων των μουσικών αρχείων από το φάκελο raw
         Field[] fields = R.raw.class.getFields();
@@ -75,6 +108,8 @@ public class MainActivity extends AppCompatActivity {
                 trackList.add(resId);
                 // Προσθέστε τον τίτλο του τραγουδιού στη λίστα (προσαρμόστε τους τίτλους όπως χρειάζεται)
                 trackTitles.add(field.getName().replace("_", " ")); // Για παράδειγμα, αν τα ονόματα των αρχείων είναι τα ονόματα των κομματιών
+                handler.removeCallbacks(updateSeekBar);
+
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -103,6 +138,7 @@ public class MainActivity extends AppCompatActivity {
         }
         if (mediaPlayer != null) {
             mediaPlayer.start();
+            handler.postDelayed(updateSeekBar, 0);
             Toast.makeText(this, "Playing Track " + (currentTrackIndex + 1), Toast.LENGTH_SHORT).show();
             updateSongTitle(); // Ενημέρωση τίτλου τραγουδιού κατά την αναπαραγωγή
         }
