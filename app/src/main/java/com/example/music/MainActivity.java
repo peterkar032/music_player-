@@ -1,5 +1,9 @@
 package com.example.music;
 
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.View;
@@ -16,18 +20,26 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class MainActivity extends AppCompatActivity {
     private MediaPlayer mediaPlayer;
     private boolean isPlaying = false; // Κατάσταση αναπαραγωγής/παύσης
     private int currentTrackIndex = 0; // Τρέχον κομμάτι
-    private List<Integer> trackList = new ArrayList<>(); // Λίστα τραγουδιών
+    private List<Integer> recycleList = new ArrayList<>(); // Λίστα τραγουδιών
     private List<String> trackTitles = new ArrayList<>(); // Λίστα τίτλων τραγουδιών
+
+    private RecyclerView recyclerView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        // Καθαρίστε τις λίστες πριν την προσθήκη νέων τραγουδιών
+        recycleList.clear();
+        trackTitles.clear();
 
         // Φόρτωση κομματιών από τον φάκελο raw
         loadTracks();
@@ -48,7 +60,10 @@ public class MainActivity extends AppCompatActivity {
         Button btnPlayPause = findViewById(R.id.PlayButton);
         Button btnNext = findViewById(R.id.NextButton);
         Button btnPrevious = findViewById(R.id.PrevButton);
-        TextView songTitleTextView = findViewById(R.id.SongTitle); // Αναφορά στο TextView τίτλου τραγουδιού
+
+        // Αναφορά στο ListView και ρύθμιση της λίστας τραγουδιών
+        recyclerView = findViewById(R.id.recycler_view);
+        setupRecyclerView();
 
         // Ρύθμιση listeners
         btnPlayPause.setOnClickListener(v -> {
@@ -65,16 +80,29 @@ public class MainActivity extends AppCompatActivity {
         btnNext.setOnClickListener(v -> nextTrack());
         btnPrevious.setOnClickListener(v -> previousTrack());
     }
+    private void setupRecyclerView() {
+    TrackAdapter adapter = new TrackAdapter(trackTitles, position -> {
+        currentTrackIndex = position;
+        initializeMediaPlayer();
+        playMusic();
+    });
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(adapter);
+}
 
     private void loadTracks() {
+        // Καθαρίστε τη λίστα πριν την προσθήκη των τραγουδιών
+        recycleList.clear();
+        trackTitles.clear();
+
         // Χρήση reflection για την ανάκτηση όλων των μουσικών αρχείων από το φάκελο raw
         Field[] fields = R.raw.class.getFields();
         for (Field field : fields) {
             try {
                 int resId = field.getInt(null);
-                trackList.add(resId);
-                // Προσθέστε τον τίτλο του τραγουδιού στη λίστα (προσαρμόστε τους τίτλους όπως χρειάζεται)
-                trackTitles.add(field.getName().replace("_", " ")); // Για παράδειγμα, αν τα ονόματα των αρχείων είναι τα ονόματα των κομματιών
+                recycleList.add(resId);
+                // Προσθέστε τον τίτλο του τραγουδιού στη λίστα
+                trackTitles.add(field.getName().replace("_", " "));
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -86,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
             mediaPlayer.stop();
             mediaPlayer.release();
         }
-        mediaPlayer = MediaPlayer.create(this, trackList.get(currentTrackIndex));
+        mediaPlayer = MediaPlayer.create(this, recycleList.get(currentTrackIndex));
         mediaPlayer.setOnCompletionListener(mp -> nextTrack());
         mediaPlayer.setOnErrorListener((mp, what, extra) -> {
             Toast.makeText(this, "Error occurred during playback", Toast.LENGTH_SHORT).show();
@@ -116,20 +144,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void nextTrack() {
-        currentTrackIndex = (currentTrackIndex + 1) % trackList.size(); // Περιστροφική εναλλαγή
+        currentTrackIndex = (currentTrackIndex + 1) % recycleList.size(); // Περιστροφική εναλλαγή
         initializeMediaPlayer();
         playMusic();
     }
 
     private void previousTrack() {
-        currentTrackIndex = (currentTrackIndex - 1 + trackList.size()) % trackList.size(); // Περιστροφική εναλλαγή
+        currentTrackIndex = (currentTrackIndex - 1 + recycleList.size()) % recycleList.size(); // Περιστροφική εναλλαγή
         initializeMediaPlayer();
         playMusic();
     }
 
     private void updateSongTitle() {
-        TextView songTitleTextView = findViewById(R.id.SongTitle); // Αναφορά στο TextView τίτλου τραγουδιού
-        songTitleTextView.setText(trackTitles.get(currentTrackIndex)); // Ενημέρωση με τον τίτλο του τρέχοντος κομματιού
+        TextView songTitleTextView = findViewById(R.id.SongTitle);
+        songTitleTextView.setText(trackTitles.get(currentTrackIndex));
     }
 
     @Override
