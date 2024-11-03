@@ -1,5 +1,6 @@
 package com.example.music;
 
+import android.content.Intent;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import android.widget.ArrayAdapter;
@@ -23,10 +24,11 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private MediaPlayer mediaPlayer;
-    private boolean isPlaying = false; // Κατάσταση αναπαραγωγής/παύσης
-    private int currentTrackIndex = 0; // Τρέχον κομμάτι
-    private List<Integer> recycleList = new ArrayList<>(); // Λίστα τραγουδιών
-    private List<String> trackTitles = new ArrayList<>(); // Λίστα τίτλων τραγουδιών
+
+    private boolean isPlaying = false; // Playback state
+    private int currentTrackIndex = 0; // Current track index
+    private List<Integer> trackList = new ArrayList<>(); // Track list
+    private List<String> trackTitles = new ArrayList<>(); // Track titles
 
     private RecyclerView recyclerView;
 
@@ -37,17 +39,15 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
+
         // Καθαρίστε τις λίστες πριν την προσθήκη νέων τραγουδιών
         recycleList.clear();
         trackTitles.clear();
 
         // Φόρτωση κομματιών από τον φάκελο raw
         loadTracks();
-
-        // Ρύθμιση του πρώτου κομματιού
         initializeMediaPlayer();
 
-        // Διαχείριση των insets για edge-to-edge UI
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             if (v.getPaddingTop() == 0) {
@@ -56,25 +56,25 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Αναφορά στα κουμπιά
-        Button btnPlayPause = findViewById(R.id.PlayButton);
+        Button btnPlayPause = findViewById(R.id.PlayPauseButton);
         Button btnNext = findViewById(R.id.NextButton);
         Button btnPrevious = findViewById(R.id.PrevButton);
+        TextView songTitleTextView = findViewById(R.id.SongTitle);
 
         // Αναφορά στο ListView και ρύθμιση της λίστας τραγουδιών
         recyclerView = findViewById(R.id.recycler_view);
         setupRecyclerView();
 
-        // Ρύθμιση listeners
         btnPlayPause.setOnClickListener(v -> {
             if (isPlaying) {
                 btnPlayPause.setText("PLAY");
-                pauseMusic();
+                stopService(new Intent(this, MusicService.class));
+                isPlaying = false;
             } else {
                 btnPlayPause.setText("PAUSE");
-                playMusic();
+                startMusicService();
+                isPlaying = true;
             }
-            isPlaying = !isPlaying; // Εναλλαγή κατάστασης αναπαραγωγής
         });
 
         btnNext.setOnClickListener(v -> nextTrack());
@@ -100,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
         for (Field field : fields) {
             try {
                 int resId = field.getInt(null);
+                trackList.add(resId);
                 recycleList.add(resId);
                 // Προσθέστε τον τίτλο του τραγουδιού στη λίστα
                 trackTitles.add(field.getName().replace("_", " "));
@@ -120,19 +121,20 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Error occurred during playback", Toast.LENGTH_SHORT).show();
             return true;
         });
-
-        // Ενημέρωση του TextView με τον τίτλο του τραγουδιού
         updateSongTitle();
     }
 
+    private void startMusicService() {
+        Intent serviceIntent = new Intent(this, MusicService.class);
+        serviceIntent.putExtra("track_index", currentTrackIndex);
+        startService(serviceIntent);
+        playMusic();
+    }
+
     private void playMusic() {
-        if (mediaPlayer == null) {
-            initializeMediaPlayer();
-        }
         if (mediaPlayer != null) {
             mediaPlayer.start();
             Toast.makeText(this, "Playing Track " + (currentTrackIndex + 1), Toast.LENGTH_SHORT).show();
-            updateSongTitle(); // Ενημέρωση τίτλου τραγουδιού κατά την αναπαραγωγή
         }
     }
 
@@ -144,13 +146,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void nextTrack() {
+        currentTrackIndex = (currentTrackIndex + 1) % trackList.size();
+
         currentTrackIndex = (currentTrackIndex + 1) % recycleList.size(); // Περιστροφική εναλλαγή
         initializeMediaPlayer();
         playMusic();
     }
 
     private void previousTrack() {
+
+        currentTrackIndex = (currentTrackIndex - 1 + trackList.size()) % trackList.size();
+
         currentTrackIndex = (currentTrackIndex - 1 + recycleList.size()) % recycleList.size(); // Περιστροφική εναλλαγή
+
         initializeMediaPlayer();
         playMusic();
     }
@@ -165,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             pauseMusic();
-            Button btnPlayPause = findViewById(R.id.PlayButton);
+            Button btnPlayPause = findViewById(R.id.PlayPauseButton);
             btnPlayPause.setText("PLAY");
             isPlaying = false;
         }
