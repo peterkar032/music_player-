@@ -7,6 +7,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
+import android.widget.SeekBar;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -24,6 +26,27 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private MediaPlayer mediaPlayer;
+    private boolean isPlaying = false; // Κατάσταση αναπαραγωγής/παύσης
+    private int currentTrackIndex = 0; // Τρέχον κομμάτι
+    private List<Integer> trackList = new ArrayList<>(); // Λίστα τραγουδιών
+    private List<String> trackTitles = new ArrayList<>(); // Λίστα τίτλων τραγουδιών
+    private SeekBar seekBar;
+
+
+    private android.os.Handler handler = new android.os.Handler();
+
+    private final  Runnable updateSeekBar = new Runnable() {
+        @Override
+        public void run() {
+            if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                int currentPosition = mediaPlayer.getCurrentPosition();
+                int duration = mediaPlayer.getDuration();
+                seekBar.setProgress((int) (100.0 * currentPosition / duration));
+                handler.postDelayed(this, 1000);
+            }
+        }
+    };
+
 
     private boolean isPlaying = false; // Playback state
     private int currentTrackIndex = 0; // Current track index
@@ -40,9 +63,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
+        seekBar = findViewById(R.id.seekBar);
+
+
+
         // Καθαρίστε τις λίστες πριν την προσθήκη νέων τραγουδιών
         recycleList.clear();
         trackTitles.clear();
+
 
         // Φόρτωση κομματιών από τον φάκελο raw
         loadTracks();
@@ -56,7 +84,13 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+
+
+        // Αναφορά στα κουμπιά
+        Button btnPlayPause = findViewById(R.id.PlayButton);
+
         Button btnPlayPause = findViewById(R.id.PlayPauseButton);
+
         Button btnNext = findViewById(R.id.NextButton);
         Button btnPrevious = findViewById(R.id.PrevButton);
         TextView songTitleTextView = findViewById(R.id.SongTitle);
@@ -64,6 +98,29 @@ public class MainActivity extends AppCompatActivity {
         // Αναφορά στο ListView και ρύθμιση της λίστας τραγουδιών
         recyclerView = findViewById(R.id.recycler_view);
         setupRecyclerView();
+
+
+        seekBar = findViewById(R.id.seekBar);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && mediaPlayer != null) {
+                    mediaPlayer.seekTo(progress * mediaPlayer.getDuration() / 100);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+
+
+
+
+        // Ρύθμιση listeners
 
         btnPlayPause.setOnClickListener(v -> {
             if (isPlaying) {
@@ -90,6 +147,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 }
 
+
     private void loadTracks() {
         // Καθαρίστε τη λίστα πριν την προσθήκη των τραγουδιών
         recycleList.clear();
@@ -101,9 +159,15 @@ public class MainActivity extends AppCompatActivity {
             try {
                 int resId = field.getInt(null);
                 trackList.add(resId);
+
+                // Προσθέστε τον τίτλο του τραγουδιού στη λίστα (προσαρμόστε τους τίτλους όπως χρειάζεται)
+                trackTitles.add(field.getName().replace("_", " ")); // Για παράδειγμα, αν τα ονόματα των αρχείων είναι τα ονόματα των κομματιών
+                handler.removeCallbacks(updateSeekBar);
+
                 recycleList.add(resId);
                 // Προσθέστε τον τίτλο του τραγουδιού στη λίστα
                 trackTitles.add(field.getName().replace("_", " "));
+
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -134,6 +198,7 @@ public class MainActivity extends AppCompatActivity {
     private void playMusic() {
         if (mediaPlayer != null) {
             mediaPlayer.start();
+            handler.postDelayed(updateSeekBar, 0);
             Toast.makeText(this, "Playing Track " + (currentTrackIndex + 1), Toast.LENGTH_SHORT).show();
         }
     }
