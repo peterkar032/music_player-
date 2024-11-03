@@ -1,17 +1,17 @@
 package com.example.music;
 
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +22,8 @@ public class MainActivity extends AppCompatActivity {
     private int currentTrackIndex = 0; // Τρέχον κομμάτι
     private List<Integer> trackList = new ArrayList<>(); // Λίστα τραγουδιών
     private List<String> trackTitles = new ArrayList<>(); // Λίστα τίτλων τραγουδιών
+    private LinearLayout playerContainer;
+    private GestureDetector gestureDetector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,20 +31,13 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        // Φόρτωση κομματιών από τον φάκελο raw
         loadTracks();
-
-        // Ρύθμιση του πρώτου κομματιού
         initializeMediaPlayer();
 
-        // Διαχείριση των insets για edge-to-edge UI
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            if (v.getPaddingTop() == 0) {
-                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            }
-            return insets;
-        });
+        playerContainer = findViewById(R.id.player_container);
+        gestureDetector = new GestureDetector(this, new GestureListener());
+
+        setupPlayerClickListener();
 
         // Αναφορά στα κουμπιά
         Button btnPlayPause = findViewById(R.id.PlayButton);
@@ -66,15 +61,24 @@ public class MainActivity extends AppCompatActivity {
         btnPrevious.setOnClickListener(v -> previousTrack());
     }
 
+    private void setupPlayerClickListener() {
+        playerContainer.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
+            intent.putExtra("TRACK_INDEX", currentTrackIndex);
+            intent.putExtra("SONG_TITLE", trackTitles.get(currentTrackIndex));
+            intent.putIntegerArrayListExtra("TRACK_LIST", new ArrayList<>(trackList)); // Προσθήκη της λίστας
+            startActivity(intent);
+        });
+    }
+
+
     private void loadTracks() {
-        // Χρήση reflection για την ανάκτηση όλων των μουσικών αρχείων από το φάκελο raw
         Field[] fields = R.raw.class.getFields();
         for (Field field : fields) {
             try {
                 int resId = field.getInt(null);
                 trackList.add(resId);
-                // Προσθέστε τον τίτλο του τραγουδιού στη λίστα (προσαρμόστε τους τίτλους όπως χρειάζεται)
-                trackTitles.add(field.getName().replace("_", " ")); // Για παράδειγμα, αν τα ονόματα των αρχείων είναι τα ονόματα των κομματιών
+                trackTitles.add(field.getName().replace("_", " "));
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -93,7 +97,6 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
-        // Ενημέρωση του TextView με τον τίτλο του τραγουδιού
         updateSongTitle();
     }
 
@@ -101,10 +104,10 @@ public class MainActivity extends AppCompatActivity {
         if (mediaPlayer == null) {
             initializeMediaPlayer();
         }
-        if (mediaPlayer != null) {
+        if (mediaPlayer != null && !mediaPlayer.isPlaying()) {
             mediaPlayer.start();
             Toast.makeText(this, "Playing Track " + (currentTrackIndex + 1), Toast.LENGTH_SHORT).show();
-            updateSongTitle(); // Ενημέρωση τίτλου τραγουδιού κατά την αναπαραγωγή
+            updateSongTitle();
         }
     }
 
@@ -116,20 +119,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void nextTrack() {
-        currentTrackIndex = (currentTrackIndex + 1) % trackList.size(); // Περιστροφική εναλλαγή
+        currentTrackIndex = (currentTrackIndex + 1) % trackList.size();
         initializeMediaPlayer();
         playMusic();
     }
 
     private void previousTrack() {
-        currentTrackIndex = (currentTrackIndex - 1 + trackList.size()) % trackList.size(); // Περιστροφική εναλλαγή
+        currentTrackIndex = (currentTrackIndex - 1 + trackList.size()) % trackList.size();
         initializeMediaPlayer();
         playMusic();
     }
 
     private void updateSongTitle() {
-        TextView songTitleTextView = findViewById(R.id.SongTitle); // Αναφορά στο TextView τίτλου τραγουδιού
-        songTitleTextView.setText(trackTitles.get(currentTrackIndex)); // Ενημέρωση με τον τίτλο του τρέχοντος κομματιού
+        TextView songTitleTextView = findViewById(R.id.SongTitle);
+        songTitleTextView.setText(trackTitles.get(currentTrackIndex));
     }
 
     @Override
@@ -149,6 +152,40 @@ public class MainActivity extends AppCompatActivity {
         if (mediaPlayer != null) {
             mediaPlayer.release();
             mediaPlayer = null;
+        }
+    }
+
+    public List<Integer> getTrackList() {
+        return trackList; // Επιστρέφει τη λίστα τραγουδιών
+    }
+
+    private class GestureListener extends GestureDetector.SimpleOnGestureListener {
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            if (e1.getY() > e2.getY()) {
+                // Ο χρήστης σύρει προς τα πάνω
+                expandPlayer();
+            } else if (e1.getY() < e2.getY()) {
+                // Ο χρήστης σύρει προς τα κάτω
+                collapsePlayer();
+            }
+            return true;
+        }
+
+        private void expandPlayer() {
+            // Μεγέθυνση του player
+            playerContainer.animate()
+                    .translationY(0)
+                    .setDuration(300)
+                    .start();
+        }
+
+        private void collapsePlayer() {
+            // Μείωση του player
+            playerContainer.animate()
+                    .translationY(playerContainer.getHeight())
+                    .setDuration(300)
+                    .start();
         }
     }
 }
