@@ -27,6 +27,11 @@
         <activity
             android:name=".PlayerActivity"
             android:exported="true" />
+
+        <service android:name=".MusicService"
+            android:foregroundServiceType="mediaPlayback"/>
+        <receiver android:name=".MusicControlReceiver" />
+
     </application>
 
 </manifest>
