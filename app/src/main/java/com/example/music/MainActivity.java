@@ -32,12 +32,6 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private MediaPlayer mediaPlayer;
-    private boolean isPlaying = false; // Κατάσταση αναπαραγωγής/παύσης
-    private int currentTrackIndex = 0; // Τρέχον κομμάτι
-    private List<Integer> trackList = new ArrayList<>(); // Λίστα τραγουδιών
-    private List<String> trackTitles = new ArrayList<>(); // Λίστα τίτλων τραγουδιών
-    //Button button_1,button_2,button_3,button_4;
     TabLayout tabLayout;
     ViewPager2 viewPager2;
     ViewPagerAdapter viewPagerAdapter;
