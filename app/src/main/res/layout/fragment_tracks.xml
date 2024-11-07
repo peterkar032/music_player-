@@ -12,61 +12,14 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:text="@string/app_name"
-            android:gravity="center"
-            android:layout_marginTop="5dp"
-            android:textSize="30sp"
-            android:fontFamily="sans_serif_smallcaps"
-            android:textColor="@color/my_primary"
-            android:id="@+id/app_title"/>
-
-
-        <!--Σχεδιασμος των καρτελων-->
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tabLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <com.google.android.material.tabs.TabItem
-                android:text="Tracks"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <com.google.android.material.tabs.TabItem
-                android:text="Playlists"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <com.google.android.material.tabs.TabItem
-                android:text="Artists"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <com.google.android.material.tabs.TabItem
-                android:text="Albums"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-        </com.google.android.material.tabs.TabLayout>
-        
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/viewPager"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-        <!--Τελος σχεδιασμου καρτελων-->
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view"
             android:layout_width="match_parent"
             android:layout_height="383dp"
             android:layout_marginTop="35dp"
-
             android:layout_weight="1" />
 
-        <!-- Εμφάνιση του τίτλου του τρέχοντος τραγουδιού -->
         <TextView
             android:id="@+id/SongTitle"
             android:layout_width="wrap_content"
@@ -78,7 +31,6 @@
             android:textSize="18sp"
             android:textStyle="bold" />
 
-        <!-- Εμφάνιση του τίτλου του καλλιτέχνη -->
         <TextView
             android:id="@+id/ArtistTitle"
             android:layout_width="wrap_content"
@@ -89,7 +41,6 @@
             android:textColor="#000000"
             android:textSize="16sp" />
 
-        <!-- Εικόνα για το εξώφυλλο άλμπουμ ή εικονίδιο μουσικής -->
         <ImageView
             android:id="@+id/imageView2"
             android:layout_width="wrap_content"
@@ -99,14 +50,12 @@
             android:contentDescription="Music icon"
             android:src="@drawable/music" />
 
-        <!-- SeekBar για την πρόοδο του κομματιού -->
         <SeekBar
             android:id="@+id/seekBar3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp" />
 
-        <!-- Έλεγχοι για την αναπαραγωγή -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -122,13 +71,22 @@
                 android:text="PREV" />
 
             <Button
-                android:id="@+id/PlayPauseButton"
+                android:id="@+id/PlayButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:backgroundTint="#2196F3"
-                android:text="PLAY" /> <!-- Αυτό το κουμπί θα εναλλάσσει μεταξύ play/pause -->
+                android:text="PLAY" />
+
+            <Button
+                android:id="@+id/PauseButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:backgroundTint="#2196F3"
+                android:text="PAUSE" />
 
             <Button
                 android:id="@+id/NextButton"
@@ -137,6 +95,7 @@
                 android:backgroundTint="#2196F3"
                 android:text="NEXT" />
         </LinearLayout>
+
     </LinearLayout>
 
 </RelativeLayout>
