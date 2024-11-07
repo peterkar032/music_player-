@@ -2,6 +2,10 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main"
+
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
@@ -28,9 +32,74 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="@string/app_name"
+            android:gravity="center"
+            android:layout_marginTop="5dp"
+            android:textSize="30sp"
+            android:fontFamily="sans_serif_smallcaps"
+            android:textColor="@color/my_primary"
+            android:id="@+id/app_title"/>
+
+
+        <!--Σχεδιασμος των καρτελων-->
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.tabs.TabItem
+                android:text="Tracks"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <com.google.android.material.tabs.TabItem
+                android:text="Playlists"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <com.google.android.material.tabs.TabItem
+                android:text="Artists"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <com.google.android.material.tabs.TabItem
+                android:text="Albums"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </com.google.android.material.tabs.TabLayout>
+        
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+        <!--Τελος σχεδιασμου καρτελων-->
+
         <LinearLayout
             android:id="@+id/player_container"
             android:layout_width="match_parent"
+
+            android:layout_height="383dp"
+            android:layout_marginTop="35dp"
+
+            android:layout_weight="1" />
+
+        <!-- Εμφάνιση του τίτλου του τρέχοντος τραγουδιού -->
+        <TextView
+            android:id="@+id/SongTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Song Title"
+            android:textAlignment="center"
+            android:textColor="#000000"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+
             android:layout_height="wrap_content"
             android:background="#F0F0F0"
             android:gravity="center_vertical"
@@ -56,6 +125,8 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
+
+        <!-- Έλεγχοι για την αναπαραγωγή -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -72,12 +143,14 @@
                 android:text="PREV" />
 
             <Button
+
                 android:id="@+id/PlayButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:layout_weight="1"
                 android:text="PLAY" />
+
 
             <Button
                 android:id="@+id/NextButton"
@@ -89,3 +162,4 @@
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+
