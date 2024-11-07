@@ -1,12 +1,13 @@
 package com.example.music;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
-import android.media.MediaPlayer;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -20,13 +21,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private MediaPlayer mediaPlayer;
 
     private boolean isPlaying = false; // Κατάσταση αναπαραγωγής
     private int currentTrackIndex = 0; // Τρέχων δείκτης κομματιού
     private List<Integer> trackList = new ArrayList<>(); // Λίστα κομματιών
     private List<String> trackTitles = new ArrayList<>(); // Τίτλοι κομματιών
-
     private RecyclerView recyclerView; // RecyclerView για εμφάνιση κομματιών
 
     @Override
@@ -103,14 +102,6 @@ public class MainActivity extends AppCompatActivity {
         Intent serviceIntent = new Intent(this, MusicService.class);
         serviceIntent.putExtra("track_index", currentTrackIndex); // Μεταφορά του τρέχοντος δείκτη κομματιού
         startService(serviceIntent); // Εκκίνηση της υπηρεσίας μουσικής
-        playMusic(); // Αναπαραγωγή μουσικής
-    }
-
-    private void playMusic() {
-        if (mediaPlayer != null) {
-            mediaPlayer.start();
-            Toast.makeText(this, "Αναπαραγωγή Κομματιού " + (currentTrackIndex + 1), Toast.LENGTH_SHORT).show();
-        }
     }
 
     private void nextTrack() {
@@ -123,23 +114,33 @@ public class MainActivity extends AppCompatActivity {
         startMusicService(); // Εκκίνηση υπηρεσίας μουσικής για το προηγούμενο κομμάτι
     }
 
+    private BroadcastReceiver trackTitleReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String trackTitle = intent.getStringExtra("track_title");
+            TextView songTitleTextView = findViewById(R.id.SongTitle); // Χρησιμοποιούμε το SongTitle
+            songTitleTextView.setText(trackTitle); // Ενημερώνουμε το κείμενο του TextView
+        }
+    };
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        IntentFilter filter = new IntentFilter("TRACK_TITLE_UPDATE");
+        registerReceiver(trackTitleReceiver, filter); // Εγγραφή του BroadcastReceiver
+    }
+
     @Override
     protected void onStop() {
         super.onStop();
-        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-            mediaPlayer.pause(); // Παύση της αναπαραγωγής
-            Button btnPlayPause = findViewById(R.id.PlayPauseButton);
-            btnPlayPause.setText("PLAY"); // Ενημέρωση του κουμπιού
-            isPlaying = false; // Κατάσταση μη αναπαραγωγής
-        }
+        unregisterReceiver(trackTitleReceiver); // Απεγγραφή του BroadcastReceiver
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mediaPlayer != null) {
-            mediaPlayer.release(); // Απελευθέρωση πόρων
-            mediaPlayer = null; // Μηδενισμός της αναφοράς
+        if (isPlaying) {
+            stopService(new Intent(this, MusicService.class));
         }
     }
 }

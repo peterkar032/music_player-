@@ -6,40 +6,45 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
-import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.IBinder;
+import android.media.MediaPlayer;
 import androidx.core.app.NotificationCompat;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MusicService extends Service {
+
     private MediaPlayer mediaPlayer;
     private static final String CHANNEL_ID = "MusicServiceChannel";
     private int currentTrackIndex = 0;
     private List<Integer> trackList;
+    private List<String> trackTitles;
 
     @Override
     public void onCreate() {
         super.onCreate();
         createNotificationChannel();
-        loadTracks();
-        initializeMediaPlayer();
-        mediaPlayer.setLooping(true);
+        loadTracks(); // Φορτώνει τη λίστα τραγουδιών
+        initializeMediaPlayer(); // Αρχικοποιεί το MediaPlayer
+        mediaPlayer.setLooping(true); // Ενεργοποιεί το loop για συνεχή αναπαραγωγή
+
+        // Ξεκινάμε την υπηρεσία ως foreground με ειδοποίηση
+        startForeground(1, createNotification());
     }
 
-    private void loadTracks() {
-        trackList = new ArrayList<>();
-        Field[] fields = R.raw.class.getFields();
-        for (Field field : fields) {
-            try {
-                int resId = field.getInt(null);
-                trackList.add(resId);
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }
+    private Notification createNotification() {
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        return new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle("Music Playing")
+                .setContentText("Track " + (currentTrackIndex + 1)) // Ενημέρωση τίτλου τραγουδιού
+                .setSmallIcon(R.drawable.music1)
+                .setContentIntent(pendingIntent)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .build();
     }
 
     @Override
@@ -51,24 +56,35 @@ public class MusicService extends Service {
                 initializeMediaPlayer(); // Αρχικοποίηση του MediaPlayer με το νέο κομμάτι
             }
             mediaPlayer.start(); // Ξεκινάμε την αναπαραγωγή
-            showNotification(); // Ενημερώνουμε τη ειδοποίηση
         }
-        return START_STICKY;
+
+        return START_STICKY; // Επιτρέπει στην υπηρεσία να παραμείνει ενεργή ακόμα και αν το σύστημα την σταματήσει
     }
 
-    private void showNotification() {
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        // Σταματάμε τη μουσική όταν η εφαρμογή κλείνει
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+        }
+        stopSelf(); // Σταματάμε την υπηρεσία
+    }
 
-        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("Music Playing")
-                .setContentText("Track " + (currentTrackIndex + 1))
-                .setSmallIcon(R.drawable.music1)
-                .setContentIntent(pendingIntent)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .build();
+    private void loadTracks() {
+        trackList = new ArrayList<>();
+        trackTitles = new ArrayList<>();
 
-        startForeground(1, notification);
+        Field[] fields = R.raw.class.getFields();
+        for (Field field : fields) {
+            try {
+                int resId = field.getInt(null);
+                trackList.add(resId);
+                trackTitles.add(field.getName().replace("_", " ")); // Ενημερώνει τη λίστα με τον τίτλο του τραγουδιού
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -77,13 +93,7 @@ public class MusicService extends Service {
         if (mediaPlayer != null) {
             mediaPlayer.stop();
             mediaPlayer.release();
-            mediaPlayer = null;
         }
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null; // Δεν παρέχουμε binding
     }
 
     private void initializeMediaPlayer() {
@@ -96,13 +106,18 @@ public class MusicService extends Service {
             mediaPlayer.release();
         }
 
-        mediaPlayer = MediaPlayer.create(this, trackList.get(currentTrackIndex));
+        mediaPlayer = MediaPlayer.create(this, trackList.get(currentTrackIndex)); // Αναπαράγει το επιλεγμένο τραγούδι
         mediaPlayer.setOnCompletionListener(mp -> {
-            // Μπορείς να προσθέσεις λογική για να προχωρήσεις στο επόμενο κομμάτι αν χρειάζεται
+            // Όταν το τραγούδι τελειώνει, μεταβαίνουμε στο επόμενο
             currentTrackIndex = (currentTrackIndex + 1) % trackList.size();
             initializeMediaPlayer(); // Αρχικοποίηση του MediaPlayer με το νέο κομμάτι
             mediaPlayer.start();
         });
+
+        // Ενημερώνουμε την κύρια δραστηριότητα για τον τίτλο του τραγουδιού
+        Intent intent = new Intent("TRACK_TITLE_UPDATE");
+        intent.putExtra("track_title", trackTitles.get(currentTrackIndex));
+        sendBroadcast(intent); // Στέλνουμε το broadcast στην MainActivity
     }
 
     private void createNotificationChannel() {
@@ -117,5 +132,10 @@ public class MusicService extends Service {
                 manager.createNotificationChannel(serviceChannel);
             }
         }
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null; // Δεν παρέχουμε binding
     }
 }
