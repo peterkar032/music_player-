@@ -1,9 +1,10 @@
 plugins {
-    alias(libs.plugins.android.application)
+    id("com.android.application")
+    id("com.google.gms.google-services") // Ensure this is applied after the Android plugin
 }
 
 android {
-    namespace 'com.example.music'
+    namespace 'com.example.music' // Make sure this matches your package structure
     compileSdk 34
 
     defaultConfig {
@@ -22,6 +23,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -29,11 +31,20 @@ android {
 }
 
 dependencies {
-
+    // Firebase BOM for managing Firebase library versions
+    implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-database") // Removed specific version to use BOM
+    implementation 'com.google.firebase:firebase-database:21.0.0'
+    // Ensure these libraries are defined in your libs. Otherwise, use actual dependencies
     implementation libs.appcompat
     implementation libs.material
     implementation libs.activity
     implementation libs.constraintlayout
+
+    // If libs.firebase.database is not defined, use the following:
+    // implementation("com.google.firebase:firebase-database")
+
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
