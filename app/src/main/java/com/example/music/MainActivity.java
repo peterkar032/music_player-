@@ -31,7 +31,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this); // Δυνατότητα edge-to-edge
+        Compiler EdgeToEdge = null;
+        EdgeToEdge.enable(); // Δυνατότητα edge-to-edge
         setContentView(R.layout.activity_main);
 
         // Αρχικοποίηση του RecyclerView
