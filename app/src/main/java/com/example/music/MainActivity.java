@@ -107,8 +107,8 @@ public class MainActivity extends AppCompatActivity {
         // Εμφάνιση του progressBar κατά την αναζήτηση
         progressBar.setVisibility(View.VISIBLE);
 
-        // Δημιουργία του URL για την αναζήτηση μέσω του TheAudioDB API
-        String url = "https://www.theaudiodb.com/api/v1/json/ADEEB/searchtrack.php?s=" + query;
+        // Δημιουργία του URL για την αναζήτηση στο Deezer API
+        String url = "https://api.deezer.com/search?q=" + query;
 
         // Δημιουργία αιτήματος με χρήση του Volley
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
@@ -119,8 +119,8 @@ public class MainActivity extends AppCompatActivity {
                         Log.d("Search Response", "Response: " + response.toString());
 
                         try {
-                            if (response.has("track")) {
-                                JSONArray tracksArray = response.getJSONArray("track");
+                            if (response.has("data")) {
+                                JSONArray tracksArray = response.getJSONArray("data");
 
                                 // Καθαρισμός της λίστας για να προσθέσουμε τα νέα τραγούδια
                                 trackList.clear();
@@ -128,14 +128,17 @@ public class MainActivity extends AppCompatActivity {
                                 // Προσθήκη των τραγουδιών στην λίστα
                                 for (int i = 0; i < tracksArray.length(); i++) {
                                     JSONObject trackJson = tracksArray.getJSONObject(i);
-                                    String trackTitle = trackJson.getString("strTrack");
-                                    String artist = trackJson.getString("strArtist");
+                                    String trackTitle = trackJson.getString("title");
+                                    String artist = trackJson.getJSONObject("artist").getString("name");
 
-                                    // Εδώ παίρνουμε το URL του εξώφυλλου (αν υπάρχει)
-                                    String albumArtUrl = trackJson.optString("strTrackThumb", ""); // Επέλεξε το σωστό πεδίο
+                                    // URL του εξώφυλλου άλμπουμ (αν υπάρχει)
+                                    String albumArtUrl = trackJson.getJSONObject("album").getString("cover_medium");
+
+                                    // URL του κομματιού
+                                    String trackUrl = trackJson.getString("preview");
 
                                     // Δημιουργία και προσθήκη του τραγουδιού στη λίστα
-                                    trackList.add(new Track(trackTitle, artist, "", albumArtUrl)); // Προσθέτουμε το albumArtUrl
+                                    trackList.add(new Track(trackTitle, artist, trackUrl, albumArtUrl));
                                 }
 
                                 // Ενημέρωση του RecyclerView με τα αποτελέσματα της αναζήτησης
@@ -143,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
                             } else {
                                 // Αν δεν υπάρχουν αποτελέσματα, εμφανίζουμε μήνυμα
                                 Log.d("Search Response", "No tracks found for query: " + query);
+                                Toast.makeText(MainActivity.this, "No tracks found.", Toast.LENGTH_SHORT).show();
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -165,5 +169,4 @@ public class MainActivity extends AppCompatActivity {
         // Προσθήκη του αιτήματος στη σειρά αιτήσεων του Volley
         Volley.newRequestQueue(this).add(jsonObjectRequest);
     }
-
 }
