@@ -3,52 +3,75 @@ package com.example.music;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.squareup.picasso.Picasso;
+
 import java.util.List;
 
 public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHolder> {
-    private final List<String> trackTitles;
-    private final OnTrackClickListener onTrackClickListener;
 
-    public TrackAdapter(List<String> trackTitles, OnTrackClickListener onTrackClickListener) {
-        this.trackTitles = trackTitles;
-        this.onTrackClickListener = onTrackClickListener;
+    private List<Track> trackList;
+    private OnItemClickListener onItemClickListener;
+
+    // Interface για την επικοινωνία με την Activity όταν επιλεγεί ένα τραγούδι
+    public interface OnItemClickListener {
+        void onItemClick(int position);
     }
 
+    // Constructor για το adapter
+    public TrackAdapter(List<Track> trackList, OnItemClickListener onItemClickListener) {
+        this.trackList = trackList;
+        this.onItemClickListener = onItemClickListener;
+    }
+
+    // Δημιουργία του ViewHolder για κάθε στοιχείο της λίστας
     @NonNull
     @Override
     public TrackViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(android.R.layout.simple_list_item_1, parent, false);
-        return new TrackViewHolder(view);
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_track, parent, false);
+        return new TrackViewHolder(itemView);
     }
 
+    // Σύνδεση δεδομένων με τα views του ViewHolder
     @Override
     public void onBindViewHolder(@NonNull TrackViewHolder holder, int position) {
-        holder.bind(trackTitles.get(position), onTrackClickListener);
+        Track currentTrack = trackList.get(position);
+
+        holder.trackTitleTextView.setText(currentTrack.getTitle());
+        holder.artistTextView.setText(currentTrack.getArtist());
+
+        // Χρήση βιβλιοθήκης Picasso για να φορτώσουμε την εικόνα εξωφύλλου αν υπάρχει
+        if (!currentTrack.getAlbumArtUrl().isEmpty()) {
+            Picasso.get().load(currentTrack.getAlbumArtUrl()).into(holder.albumArtImageView);
+        }
+
+        // Ορισμός του listener για την επιλογή του τραγουδιού
+        holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(position));
     }
 
+    // Επιστρέφει τον αριθμό των τραγουδιών στη λίστα
     @Override
     public int getItemCount() {
-        return trackTitles.size();
+        return trackList.size();
     }
 
+    // ViewHolder για το κάθε στοιχείο του RecyclerView
     public static class TrackViewHolder extends RecyclerView.ViewHolder {
-        private final TextView trackTitleTextView;
 
-        public TrackViewHolder(@NonNull View itemView) {
+        public TextView trackTitleTextView;
+        public TextView artistTextView;
+        public ImageView albumArtImageView;
+
+        public TrackViewHolder(View itemView) {
             super(itemView);
-            trackTitleTextView = itemView.findViewById(android.R.id.text1);
+            trackTitleTextView = itemView.findViewById(R.id.trackTitleTextView);
+            artistTextView = itemView.findViewById(R.id.artistTextView);
+            albumArtImageView = itemView.findViewById(R.id.albumArtImageView);
         }
-
-        public void bind(String trackTitle, OnTrackClickListener onTrackClickListener) {
-            trackTitleTextView.setText(trackTitle);
-            itemView.setOnClickListener(v -> onTrackClickListener.onTrackClick(getAdapterPosition()));
-        }
-    }
-
-    public interface OnTrackClickListener {
-        void onTrackClick(int position);
     }
 }
