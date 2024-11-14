@@ -20,7 +20,7 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
 
     // Interface για την επικοινωνία με την Activity όταν επιλεγεί ένα τραγούδι
     public interface OnItemClickListener {
-        void onItemClick(int position);
+        void onItemClick(Track track);  // Περνάμε το αντικείμενο Track στο listener
     }
 
     // Constructor για το adapter
@@ -42,22 +42,31 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
     public void onBindViewHolder(@NonNull TrackViewHolder holder, int position) {
         Track currentTrack = trackList.get(position);
 
+        // Ενημέρωση τίτλου και καλλιτέχνη
         holder.trackTitleTextView.setText(currentTrack.getTitle());
         holder.artistTextView.setText(currentTrack.getArtist());
 
-        // Χρήση βιβλιοθήκης Picasso για να φορτώσουμε την εικόνα εξωφύλλου αν υπάρχει
-        if (!currentTrack.getAlbumArtUrl().isEmpty()) {
-            Picasso.get().load(currentTrack.getAlbumArtUrl()).into(holder.albumArtImageView);
+        // Χρήση βιβλιοθήκης Picasso για φόρτωση εικόνας εξωφύλλου αν υπάρχει
+        String albumArtUrl = currentTrack.getAlbumArtUrl();
+        if (albumArtUrl != null && !albumArtUrl.isEmpty()) {
+            Picasso.get()
+                    .load(albumArtUrl)
+                    .placeholder(R.drawable.music)  // Προκαθορισμένη εικόνα σε περίπτωση φόρτωσης
+                    .error(R.drawable.music1)  // Προκαθορισμένη εικόνα σε περίπτωση σφάλματος
+                    .into(holder.albumArtImageView);
+        } else {
+            // Προκαθορισμένη εικόνα αν το URL είναι κενό
+            holder.albumArtImageView.setImageResource(R.drawable.play);
         }
 
         // Ορισμός του listener για την επιλογή του τραγουδιού
-        holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(position));
+        holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(currentTrack));
     }
 
     // Επιστρέφει τον αριθμό των τραγουδιών στη λίστα
     @Override
     public int getItemCount() {
-        return trackList.size();
+        return trackList != null ? trackList.size() : 0;
     }
 
     // ViewHolder για το κάθε στοιχείο του RecyclerView
