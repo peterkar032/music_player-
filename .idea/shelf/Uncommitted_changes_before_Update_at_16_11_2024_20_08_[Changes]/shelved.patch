@@ -1,0 +1,104 @@
+Index: app/src/main/res/layout/activity_main.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<RelativeLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\"\r\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\r\n    android:id=\"@+id/main\"\r\n    android:layout_width=\"match_parent\"\r\n    android:layout_height=\"match_parent\"\r\n    tools:context=\".MainActivity\">\r\n\r\n    <LinearLayout\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"match_parent\"\r\n        android:orientation=\"vertical\"\r\n        android:padding=\"16dp\">\r\n\r\n\r\n        <!-- EditText για αναζήτηση -->\r\n        <EditText\r\n            android:id=\"@+id/searchEditText\"\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_marginBottom=\"8dp\"\r\n            android:hint=\"Search for tracks\"\r\n            android:padding=\"8dp\" />\r\n\r\n        <!-- Κουμπί Αναζήτησης -->\r\n        <Button\r\n            android:id=\"@+id/searchButton\"\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_gravity=\"center_horizontal\"\r\n            android:layout_marginBottom=\"16dp\"\r\n            android:text=\"Search\" />\r\n\r\n        <!-- Προοδευτική γραμμή -->\r\n        <ProgressBar\r\n            android:id=\"@+id/progressBar\"\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_gravity=\"center\"\r\n            android:visibility=\"gone\" />\r\n\r\n        <!-- RecyclerView για τα αποτελέσματα -->\r\n        <androidx.recyclerview.widget.RecyclerView\r\n            android:id=\"@+id/recycler_view\"\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"0dp\"\r\n            android:layout_marginBottom=\"16dp\"\r\n            android:layout_weight=\"1\" />\r\n\r\n        <!-- Εικόνα Εξώφυλλου Άλμπουμ -->\r\n        <ImageView\r\n            android:id=\"@+id/imageView2\"\r\n            android:layout_width=\"150dp\"\r\n            android:layout_height=\"150dp\"\r\n            android:layout_gravity=\"center\"\r\n            android:layout_marginTop=\"16dp\"\r\n            android:contentDescription=\"Album cover\"\r\n            android:scaleType=\"centerCrop\"\r\n            android:src=\"@drawable/music_placeholder\" />\r\n\r\n        <!-- Τίτλος Τραγουδιού -->\r\n        <TextView\r\n            android:id=\"@+id/SongTitle\"\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_gravity=\"center_horizontal\"\r\n            android:layout_marginTop=\"16dp\"\r\n            android:text=\"Song Title\"\r\n            android:textAlignment=\"center\"\r\n            android:textColor=\"#000000\"\r\n            android:textSize=\"18sp\"\r\n            android:textStyle=\"bold\" />\r\n\r\n        <!-- Τίτλος Καλλιτέχνη -->\r\n        <TextView\r\n            android:id=\"@+id/ArtistTitle\"\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_gravity=\"center_horizontal\"\r\n            android:layout_marginTop=\"8dp\"\r\n            android:text=\"Artist Title\"\r\n            android:textAlignment=\"center\"\r\n            android:textColor=\"#000000\"\r\n            android:textSize=\"16sp\" />\r\n\r\n        <!-- Κουμπί like -->\r\n\r\n        <!-- Κουμπί add -->\r\n\r\n        <com.google.android.material.floatingactionbutton.FloatingActionButton\r\n            android:id=\"@+id/likeButton\"\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_gravity=\"left\"\r\n            android:layout_marginTop=\"16dp\"\r\n            android:backgroundTint=\"#2196F3\"\r\n            android:contentDescription=\"like button\"\r\n            android:src=\"@drawable/ic_favorite\" />\r\n\r\n        <com.google.android.material.floatingactionbutton.FloatingActionButton\r\n            android:id=\"@+id/addButton\"\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"110dp\"\r\n            android:layout_gravity=\"right\"\r\n            android:backgroundTint=\"#2196F3\"\r\n            android:contentDescription=\"Add button\"\r\n            android:src=\"@android:drawable/ic_input_add\" />\r\n\r\n        <SeekBar\r\n            android:id=\"@+id/seekBar3\"\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_marginTop=\"16dp\" />\r\n\r\n        <!-- Κουμπιά Αναπαραγωγής -->\r\n        <LinearLayout\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_marginTop=\"16dp\"\r\n            android:gravity=\"center\"\r\n            android:orientation=\"horizontal\">\r\n\r\n            <Button\r\n                android:id=\"@+id/PrevButton\"\r\n                android:layout_width=\"wrap_content\"\r\n                android:layout_height=\"wrap_content\"\r\n                android:backgroundTint=\"#2196F3\"\r\n                android:text=\"PREV\" />\r\n\r\n            <Button\r\n                android:id=\"@+id/PlayPauseButton\"\r\n                android:layout_width=\"wrap_content\"\r\n                android:layout_height=\"wrap_content\"\r\n                android:layout_marginStart=\"16dp\"\r\n                android:layout_marginEnd=\"16dp\"\r\n                android:backgroundTint=\"#2196F3\"\r\n                android:text=\"PLAY\" />\r\n\r\n            <Button\r\n                android:id=\"@+id/NextButton\"\r\n                android:layout_width=\"wrap_content\"\r\n                android:layout_height=\"wrap_content\"\r\n                android:backgroundTint=\"#2196F3\"\r\n                android:text=\"NEXT\" />\r\n\r\n\r\n        </LinearLayout>\r\n    </LinearLayout>\r\n\r\n\r\n</RelativeLayout>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/activity_main.xml b/app/src/main/res/layout/activity_main.xml
+--- a/app/src/main/res/layout/activity_main.xml	(revision 234926b7d90b02f118d06b312facf8c7ea8981d6)
++++ b/app/src/main/res/layout/activity_main.xml	(date 1731778670026)
+@@ -13,6 +13,39 @@
+         android:orientation="vertical"
+         android:padding="16dp">
+ 
++        <!-- Σχεδιασμος των Tabs -->
++        <com.google.android.material.tabs.TabLayout
++            android:id="@+id/tabLayout"
++            android:layout_width="match_parent"
++            android:layout_height="wrap_content">
++
++            <com.google.android.material.tabs.TabItem
++                android:text="Search"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"/>
++
++            <com.google.android.material.tabs.TabItem
++                android:text="Albums"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"/>
++
++            <com.google.android.material.tabs.TabItem
++                android:text="Favorites"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"/>
++
++            <com.google.android.material.tabs.TabItem
++                android:text="Playlists"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"/>
++            </com.google.android.material.tabs.TabLayout>
++
++        <androidx.viewpager2.widget.ViewPager2
++            android:id="@+id/viewPager"
++            android:layout_width="match_parent"
++            android:layout_height="match_parent"/>
++
++
+ 
+         <!-- EditText για αναζήτηση -->
+         <EditText
+Index: .idea/gradle.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"GradleMigrationSettings\" migrationVersion=\"1\" />\r\n  <component name=\"GradleSettings\">\r\n    <option name=\"linkedExternalProjectsSettings\">\r\n      <GradleProjectSettings>\r\n        <option name=\"testRunner\" value=\"CHOOSE_PER_TEST\" />\r\n        <option name=\"externalProjectPath\" value=\"$PROJECT_DIR$\" />\r\n        <option name=\"gradleJvm\" value=\"jbr-21\" />\r\n        <option name=\"modules\">\r\n          <set>\r\n            <option value=\"$PROJECT_DIR$\" />\r\n            <option value=\"$PROJECT_DIR$/app\" />\r\n          </set>\r\n        </option>\r\n        <option name=\"resolveExternalAnnotations\" value=\"false\" />\r\n      </GradleProjectSettings>\r\n    </option>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/gradle.xml b/.idea/gradle.xml
+--- a/.idea/gradle.xml	(revision 234926b7d90b02f118d06b312facf8c7ea8981d6)
++++ b/.idea/gradle.xml	(date 1731777501585)
+@@ -6,7 +6,7 @@
+       <GradleProjectSettings>
+         <option name="testRunner" value="CHOOSE_PER_TEST" />
+         <option name="externalProjectPath" value="$PROJECT_DIR$" />
+-        <option name="gradleJvm" value="jbr-21" />
++        <option name="gradleJvm" value="corretto-21" />
+         <option name="modules">
+           <set>
+             <option value="$PROJECT_DIR$" />
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><project version=\"4\">\r\n  <component name=\"ExternalStorageConfigurationManager\" enabled=\"true\" />\r\n  <component name=\"ProjectRootManager\" version=\"2\" languageLevel=\"JDK_21\" default=\"true\" project-jdk-name=\"jbr-21\" project-jdk-type=\"JavaSDK\" />\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+--- a/.idea/misc.xml	(revision 234926b7d90b02f118d06b312facf8c7ea8981d6)
++++ b/.idea/misc.xml	(date 1731777562598)
+@@ -1,4 +1,5 @@
++<?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+   <component name="ExternalStorageConfigurationManager" enabled="true" />
+-  <component name="ProjectRootManager" version="2" languageLevel="JDK_21" default="true" project-jdk-name="jbr-21" project-jdk-type="JavaSDK" />
++  <component name="ProjectRootManager" version="2" languageLevel="JDK_21" default="true" project-jdk-name="corretto-21" project-jdk-type="JavaSDK" />
+ </project>
+\ No newline at end of file
+Index: app/src/main/res/values/strings.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><resources>\r\n    <string name=\"app_name\">DJ FELIX</string>\r\n</resources>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+--- a/app/src/main/res/values/strings.xml	(revision 234926b7d90b02f118d06b312facf8c7ea8981d6)
++++ b/app/src/main/res/values/strings.xml	(date 1731779385141)
+@@ -1,3 +1,5 @@
+ <resources>
+     <string name="app_name">DJ FELIX</string>
++    <!-- TODO: Remove or change this placeholder text -->
++    <string name="hello_blank_fragment">Hello blank fragment</string>
+ </resources>
+\ No newline at end of file
