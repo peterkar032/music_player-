@@ -15,4 +15,6 @@ public class Favorites extends Fragment {
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_favorites, container, false);
     }
+
+    //try
 }
