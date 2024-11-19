@@ -1,13 +1,14 @@
 {
   "project_info": {
-    "project_number": "953151455165",
-    "project_id": "musicplayer-77ed0",
-    "storage_bucket": "musicplayer-77ed0.firebasestorage.app"
+    "project_number": "283870385120",
+    "firebase_url": "https://music-89afe-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "music-89afe",
+    "storage_bucket": "music-89afe.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:953151455165:android:e41337f1b877c1af3e9cd4",
+        "mobilesdk_app_id": "1:283870385120:android:ce573903a2198c902d5185",
         "android_client_info": {
           "package_name": "com.example.music"
         }
@@ -15,7 +16,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyA_CGjkS3d52CIVYNTiMdObQBd4Nb7sQ64"
+          "current_key": "AIzaSyCI42Rvpvu2t2Td_0kHaKfD3v8mAdVuhaQ"
         }
       ],
       "services": {
