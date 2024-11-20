@@ -3,7 +3,7 @@ name: Build APK and Create GitHub Release
 on:
   push:
     branches:
-      - master  # Triggers on pushes to the master branch
+      - main  # Change to your default branch if necessary
 
 jobs:
   build-and-release:
@@ -19,7 +19,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          distribution: 'correto'
+          distribution: 'corretto'
           java-version: '21'
 
       # Cache Gradle dependencies
@@ -30,6 +30,10 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+
+      # Make Gradlew Executable
+      - name: Make Gradlew Executable
+        run: chmod +x ./gradlew
 
       # Build the APK
       - name: Build the APK
@@ -48,7 +52,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v${{ github.run_number }}  # Automatically increment version
+          tag_name: v${{ github.run_number }}
           release_name: APK Release v${{ github.run_number }}
           body: |
             This release contains the latest build of the APK.
@@ -65,3 +69,4 @@ jobs:
           asset_path: app/build/outputs/apk/release/*.apk  # Adjust path as necessary
           asset_name: MyApp-v${{ github.run_number }}.apk
           asset_content_type: application/vnd.android.package-archive
+
