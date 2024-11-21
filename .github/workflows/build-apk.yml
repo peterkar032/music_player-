@@ -19,8 +19,9 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          distribution: 'corretto'
+          distribution: amazon-corretto
           java-version: '21'
+          java-package: jdk
 
       # Cache Gradle dependencies
       - name: Cache Gradle
