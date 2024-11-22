@@ -42,20 +42,28 @@ public class Albums extends Fragment {
 
         // Εύρεση στοιχείων UI
         ImageButton rapAlbumImageButton = view.findViewById(R.id.rapAlbumImageButton);
+        ImageButton laikaAlbumImageButton = view.findViewById(R.id.laikaAlbumImageButton);
         tracksRecyclerView = view.findViewById(R.id.tracksRecyclerView);
         progressBar = view.findViewById(R.id.progressBar);
         tracksContainer = view.findViewById(R.id.tracksContainer);
 
         // Ρύθμιση RecyclerView
         trackAdapter = new TrackAdapter(trackList, track -> {
-            // Ενέργεια για επιλογή τραγουδιού
             Toast.makeText(getContext(), "Playing: " + track.getTitle(), Toast.LENGTH_SHORT).show();
         });
         tracksRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         tracksRecyclerView.setAdapter(trackAdapter);
 
-        // Όταν πατηθεί το κουμπί-εικόνα του άλμπουμ
-        rapAlbumImageButton.setOnClickListener(v -> showTracksContainer());
+        // Χειριστές για τα κουμπιά άλμπουμ
+        rapAlbumImageButton.setOnClickListener(v -> {
+            showTracksContainer();
+            loadRapTracks();
+        });
+
+        laikaAlbumImageButton.setOnClickListener(v -> {
+            showTracksContainer();
+            loadLaikaTracks();
+        });
 
         return view;
     }
@@ -64,42 +72,44 @@ public class Albums extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Διαχείριση Back Button
         requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
                 if (tracksContainer.getVisibility() == View.VISIBLE) {
-                    // Αν είναι ανοιχτή η λίστα, κλείσε τη
                     hideTracksContainer();
                 } else {
-                    // Διαφορετικά, εκτέλεσε την κανονική συμπεριφορά του Back Button
-                    setEnabled(false); // Απενεργοποίηση της custom διαχείρισης
+                    setEnabled(false);
                     requireActivity().onBackPressed();
                 }
             }
         });
     }
 
-    // Εμφάνιση λίστας τραγουδιών
     private void showTracksContainer() {
         tracksContainer.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.VISIBLE);
         tracksRecyclerView.setVisibility(View.GONE);
-
-        loadRapTracks();
     }
 
-    // Απόκρυψη λίστας τραγουδιών
     private void hideTracksContainer() {
         tracksContainer.setVisibility(View.GONE);
         progressBar.setVisibility(View.GONE);
         tracksRecyclerView.setVisibility(View.GONE);
     }
 
-    // Φόρτωση rap τραγουδιών από το Deezer API
     private void loadRapTracks() {
-        String url = "https://api.deezer.com/chart/116/tracks"; // Endpoint για rap τραγούδια
+        String url = "https://api.deezer.com/chart/116/tracks";
+        loadTracksFromApi(url);
+    }
 
+    private void loadLaikaTracks() {
+        // Φόρτωση λαϊκών τραγουδιών μέσω API
+        String url = "https://api.deezer.com/search?q=laika_greek";
+        loadTracksFromApi(url);
+    }
+
+
+    private void loadTracksFromApi(String url) {
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 response -> {
                     try {
