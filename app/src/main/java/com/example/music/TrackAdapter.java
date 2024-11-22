@@ -1,8 +1,10 @@
 package com.example.music;
 
 import android.content.Context;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -12,6 +14,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -20,22 +24,20 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
 
     private final List<Track> trackList;
     private final OnItemClickListener onItemClickListener;
-    private Context context = null;
+    private final Context context;
+    private DatabaseReference likesRef;
 
-    // Σταθερές για τα IDs των επιλογών μενού
-    private static final int MENU_LIKE = 1;
-    private static final int MENU_ADD_TO_PLAYLIST = 2;
-
-    // Interface για την επικοινωνία με την Activity όταν επιλεγεί ένα τραγούδι
     public interface OnItemClickListener {
-        void onItemClick(Track track);  // Περνάμε το αντικείμενο Track στο listener
+        void onItemClick(Track track);
     }
 
-    // Constructor για το adapter
-    public TrackAdapter(List<Track> trackList, OnItemClickListener onItemClickListener) {
+    public TrackAdapter(List<Track> trackList, OnItemClickListener onItemClickListener, Context context) {
         this.trackList = trackList;
         this.onItemClickListener = onItemClickListener;
         this.context = context;
+
+        // Αρχικοποίηση Firebase
+        likesRef = FirebaseDatabase.getInstance().getReference("likes");
     }
 
     @NonNull
@@ -49,40 +51,26 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
     public void onBindViewHolder(@NonNull TrackViewHolder holder, int position) {
         Track currentTrack = trackList.get(position);
 
-        // Ενημέρωση τίτλου και καλλιτέχνη
+        // Ενημέρωση δεδομένων
         holder.trackTitleTextView.setText(currentTrack.getTitle());
         holder.artistTextView.setText(currentTrack.getArtist());
 
-        // Χρήση βιβλιοθήκης Picasso για φόρτωση εικόνας εξωφύλλου αν υπάρχει
-        String albumArtUrl = currentTrack.getAlbumArtUrl();
-        if (albumArtUrl != null && !albumArtUrl.isEmpty()) {
-            Picasso.get()
-                    .load(albumArtUrl)
-                    .placeholder(R.drawable.music)
-                    .error(R.drawable.music1)
-                    .into(holder.albumArtImageView);
-        } else {
-            holder.albumArtImageView.setImageResource(R.drawable.music1);
-        }
+        // Φόρτωση εικόνας εξωφύλλου
+        Picasso.get()
+                .load(currentTrack.getAlbumArtUrl())
+                .placeholder(R.drawable.music)
+                .error(R.drawable.music1)
+                .into(holder.albumArtImageView);
 
-        // Listener για κανονικό click
+        // Click για επιλογή τραγουδιού
         holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(currentTrack));
 
-        // Listener για παρατεταμένο πάτημα (context menu)
-        holder.itemView.setOnLongClickListener(v -> {
-            holder.itemView.setOnCreateContextMenuListener((menu, v1, menuInfo) -> {
-                menu.add(Menu.NONE, MENU_LIKE, Menu.NONE, "Like")
-                        .setOnMenuItemClickListener(item -> {
-                            Toast.makeText(context, "Liked: " + currentTrack.getTitle(), Toast.LENGTH_SHORT).show();
-                            return true;
-                        });
-                menu.add(Menu.NONE, MENU_ADD_TO_PLAYLIST, Menu.NONE, "Add to Playlist")
-                        .setOnMenuItemClickListener(item -> {
-                            Toast.makeText(context, "Added to playlist: " + currentTrack.getTitle(), Toast.LENGTH_SHORT).show();
-                            return true;
-                        });
+        // Ρύθμιση context menu
+        holder.itemView.setOnCreateContextMenuListener((menu, v, menuInfo) -> {
+            menu.add(Menu.NONE, R.id.menu_like, Menu.NONE, "Like").setOnMenuItemClickListener(item -> {
+                saveToFirebase(currentTrack); // Αποθήκευση στο Firebase
+                return true;
             });
-            return false; // Επιστρέφουμε false για να αφήσουμε και άλλες ενέργειες (π.χ., default actions)
         });
     }
 
@@ -91,16 +79,41 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
         return trackList != null ? trackList.size() : 0;
     }
 
-    public static class TrackViewHolder extends RecyclerView.ViewHolder {
-        public final TextView trackTitleTextView;
-        public final TextView artistTextView;
-        public final ImageView albumArtImageView;
+    private void saveToFirebase(Track track) {
+        try {
+            String trackId = likesRef.push().getKey(); // Δημιουργία μοναδικού ID
+            if (trackId != null) {
+                likesRef.child(trackId).setValue(track).addOnSuccessListener(aVoid ->
+                        Toast.makeText(context, "Track liked: " + track.getTitle(), Toast.LENGTH_SHORT).show()
+                ).addOnFailureListener(e ->
+                        Toast.makeText(context, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                );
+            } else {
+                Toast.makeText(context, "Error generating key for Firebase", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Toast.makeText(context, "Unexpected Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
 
-        public TrackViewHolder(@NonNull View itemView) {
+    public static class TrackViewHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener {
+        public TextView trackTitleTextView;
+        public TextView artistTextView;
+        public ImageView albumArtImageView;
+
+        public TrackViewHolder(View itemView) {
             super(itemView);
             trackTitleTextView = itemView.findViewById(R.id.trackTitleTextView);
             artistTextView = itemView.findViewById(R.id.artistTextView);
             albumArtImageView = itemView.findViewById(R.id.albumArtImageView);
+
+            // Ενεργοποίηση του context menu
+            itemView.setOnCreateContextMenuListener(this);
+        }
+
+        @Override
+        public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+            // Ορίζεται στο onBindViewHolder
         }
     }
 }

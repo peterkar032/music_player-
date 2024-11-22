@@ -70,11 +70,13 @@ public class Search extends Fragment {
 
         // Initialize RecyclerView and adapter
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        // Pass the context to the adapter
         trackAdapter = new TrackAdapter(trackList, track -> {
             // Play track and display details
             displayTrackDetails(view, track);
             playTrack(track);
-        });
+        }, requireContext()); // Pass the context here
 
         recyclerView.setAdapter(trackAdapter);
 
@@ -108,6 +110,7 @@ public class Search extends Fragment {
 
         return view;
     }
+
 
     private void displayTrackDetails(View view, Track track) {
         // Update album art
