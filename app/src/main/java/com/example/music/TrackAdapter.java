@@ -1,10 +1,13 @@
 package com.example.music;
 
+import android.content.Context;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,8 +18,13 @@ import java.util.List;
 
 public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHolder> {
 
-    private List<Track> trackList;
-    private OnItemClickListener onItemClickListener;
+    private final List<Track> trackList;
+    private final OnItemClickListener onItemClickListener;
+    private Context context = null;
+
+    // Σταθερές για τα IDs των επιλογών μενού
+    private static final int MENU_LIKE = 1;
+    private static final int MENU_ADD_TO_PLAYLIST = 2;
 
     // Interface για την επικοινωνία με την Activity όταν επιλεγεί ένα τραγούδι
     public interface OnItemClickListener {
@@ -27,9 +35,9 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
     public TrackAdapter(List<Track> trackList, OnItemClickListener onItemClickListener) {
         this.trackList = trackList;
         this.onItemClickListener = onItemClickListener;
+        this.context = context;
     }
 
-    // Δημιουργία του ViewHolder για κάθε στοιχείο της λίστας
     @NonNull
     @Override
     public TrackViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -37,7 +45,6 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
         return new TrackViewHolder(itemView);
     }
 
-    // Σύνδεση δεδομένων με τα views του ViewHolder
     @Override
     public void onBindViewHolder(@NonNull TrackViewHolder holder, int position) {
         Track currentTrack = trackList.get(position);
@@ -51,32 +58,45 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
         if (albumArtUrl != null && !albumArtUrl.isEmpty()) {
             Picasso.get()
                     .load(albumArtUrl)
-                    .placeholder(R.drawable.music)  // Προκαθορισμένη εικόνα σε περίπτωση φόρτωσης
-                    .error(R.drawable.music1)  // Προκαθορισμένη εικόνα σε περίπτωση σφάλματος
+                    .placeholder(R.drawable.music)
+                    .error(R.drawable.music1)
                     .into(holder.albumArtImageView);
         } else {
-            // Προκαθορισμένη εικόνα αν το URL είναι κενό
-            holder.albumArtImageView.setImageResource(R.drawable.play);
+            holder.albumArtImageView.setImageResource(R.drawable.music1);
         }
 
-        // Ορισμός του listener για την επιλογή του τραγουδιού
+        // Listener για κανονικό click
         holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(currentTrack));
+
+        // Listener για παρατεταμένο πάτημα (context menu)
+        holder.itemView.setOnLongClickListener(v -> {
+            holder.itemView.setOnCreateContextMenuListener((menu, v1, menuInfo) -> {
+                menu.add(Menu.NONE, MENU_LIKE, Menu.NONE, "Like")
+                        .setOnMenuItemClickListener(item -> {
+                            Toast.makeText(context, "Liked: " + currentTrack.getTitle(), Toast.LENGTH_SHORT).show();
+                            return true;
+                        });
+                menu.add(Menu.NONE, MENU_ADD_TO_PLAYLIST, Menu.NONE, "Add to Playlist")
+                        .setOnMenuItemClickListener(item -> {
+                            Toast.makeText(context, "Added to playlist: " + currentTrack.getTitle(), Toast.LENGTH_SHORT).show();
+                            return true;
+                        });
+            });
+            return false; // Επιστρέφουμε false για να αφήσουμε και άλλες ενέργειες (π.χ., default actions)
+        });
     }
 
-    // Επιστρέφει τον αριθμό των τραγουδιών στη λίστα
     @Override
     public int getItemCount() {
         return trackList != null ? trackList.size() : 0;
     }
 
-    // ViewHolder για το κάθε στοιχείο του RecyclerView
     public static class TrackViewHolder extends RecyclerView.ViewHolder {
+        public final TextView trackTitleTextView;
+        public final TextView artistTextView;
+        public final ImageView albumArtImageView;
 
-        public TextView trackTitleTextView;
-        public TextView artistTextView;
-        public ImageView albumArtImageView;
-
-        public TrackViewHolder(View itemView) {
+        public TrackViewHolder(@NonNull View itemView) {
             super(itemView);
             trackTitleTextView = itemView.findViewById(R.id.trackTitleTextView);
             artistTextView = itemView.findViewById(R.id.artistTextView);
