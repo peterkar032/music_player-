@@ -10,6 +10,7 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -40,7 +41,7 @@ public class Albums extends Fragment {
         View view = inflater.inflate(R.layout.fragment_albums, container, false);
 
         // Εύρεση στοιχείων UI
-        ImageButton laikaAlbumImageButton = view.findViewById(R.id.laikaAlbumImageButton);
+        ImageButton rapAlbumImageButton = view.findViewById(R.id.rapAlbumImageButton);
         tracksRecyclerView = view.findViewById(R.id.tracksRecyclerView);
         progressBar = view.findViewById(R.id.progressBar);
         tracksContainer = view.findViewById(R.id.tracksContainer);
@@ -54,12 +55,29 @@ public class Albums extends Fragment {
         tracksRecyclerView.setAdapter(trackAdapter);
 
         // Όταν πατηθεί το κουμπί-εικόνα του άλμπουμ
-        laikaAlbumImageButton.setOnClickListener(v -> showTracksContainer());
-
-        // Όταν πατηθεί το υπόβαθρο, κρύβεται η λίστα τραγουδιών
-        tracksContainer.setOnClickListener(v -> hideTracksContainer());
+        rapAlbumImageButton.setOnClickListener(v -> showTracksContainer());
 
         return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // Διαχείριση Back Button
+        requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (tracksContainer.getVisibility() == View.VISIBLE) {
+                    // Αν είναι ανοιχτή η λίστα, κλείσε τη
+                    hideTracksContainer();
+                } else {
+                    // Διαφορετικά, εκτέλεσε την κανονική συμπεριφορά του Back Button
+                    setEnabled(false); // Απενεργοποίηση της custom διαχείρισης
+                    requireActivity().onBackPressed();
+                }
+            }
+        });
     }
 
     // Εμφάνιση λίστας τραγουδιών
@@ -68,51 +86,59 @@ public class Albums extends Fragment {
         progressBar.setVisibility(View.VISIBLE);
         tracksRecyclerView.setVisibility(View.GONE);
 
-        loadRockTracks(); // Αλλαγή στη μέθοδο για ροκ τραγούδια
+        loadRapTracks();
     }
 
     // Απόκρυψη λίστας τραγουδιών
     private void hideTracksContainer() {
         tracksContainer.setVisibility(View.GONE);
+        progressBar.setVisibility(View.GONE);
+        tracksRecyclerView.setVisibility(View.GONE);
     }
 
-    // Φόρτωση ροκ τραγουδιών από το Deezer API
-    private void loadRockTracks() {
-        String query = "Rock"; // Αναζήτηση για ροκ τραγούδια
-        String url = "https://api.deezer.com/search?q=" + query;
+    // Φόρτωση rap τραγουδιών από το Deezer API
+    private void loadRapTracks() {
+        String url = "https://api.deezer.com/chart/116/tracks"; // Endpoint για rap τραγούδια
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 response -> {
                     try {
                         progressBar.setVisibility(View.GONE);
+
                         if (response.has("data")) {
                             JSONArray tracksArray = response.getJSONArray("data");
                             trackList.clear();
 
                             for (int i = 0; i < tracksArray.length(); i++) {
                                 JSONObject trackJson = tracksArray.getJSONObject(i);
-                                String trackTitle = trackJson.getString("title");
-                                String artist = trackJson.getJSONObject("artist").getString("name");
-                                String albumArtUrl = trackJson.getJSONObject("album").getString("cover_medium");
-                                String trackUrl = trackJson.getString("preview");
+
+                                String trackTitle = trackJson.optString("title", "Unknown Title");
+                                String artist = trackJson.getJSONObject("artist").optString("name", "Unknown Artist");
+                                String albumArtUrl = trackJson.getJSONObject("album").optString("cover_medium", "");
+                                String trackUrl = trackJson.optString("preview", "");
 
                                 trackList.add(new Track(trackTitle, artist, trackUrl, albumArtUrl));
                             }
-                            trackAdapter.notifyDataSetChanged();
-                            tracksRecyclerView.setVisibility(View.VISIBLE);
+
+                            if (trackList.isEmpty()) {
+                                Toast.makeText(getContext(), "No tracks found.", Toast.LENGTH_SHORT).show();
+                            } else {
+                                trackAdapter.notifyDataSetChanged();
+                                tracksRecyclerView.setVisibility(View.VISIBLE);
+                            }
                         } else {
-                            Toast.makeText(getContext(), "No tracks found.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "No data found.", Toast.LENGTH_SHORT).show();
                         }
                     } catch (Exception e) {
                         Log.e("Response Error", "Error parsing response", e);
                         progressBar.setVisibility(View.GONE);
-                        Toast.makeText(getContext(), "Error processing results", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Error processing response.", Toast.LENGTH_SHORT).show();
                     }
                 },
                 error -> {
-                    Log.e("Search Error", "Error: " + error.getMessage());
+                    Log.e("Network Error", "Error: " + error.getMessage());
                     progressBar.setVisibility(View.GONE);
-                    Toast.makeText(getContext(), "Error retrieving data: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Network error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
                 });
 
         Volley.newRequestQueue(requireContext()).add(jsonObjectRequest);
