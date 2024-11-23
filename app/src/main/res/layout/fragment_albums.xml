@@ -1,14 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Albums">
+    android:orientation="vertical"
+    android:padding="16dp">
 
-    <TextView
+    <!-- Κουμπιά για την επιλογή άλμπουμ ως λίστα -->
+    <LinearLayout
+        android:id="@+id/albumButtonsContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <!-- Κουμπί για το "Rap Album" -->
+        <ImageButton
+            android:id="@+id/rapAlbumImageButton"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginBottom="8dp"
+            android:src="@drawable/rap_album_cover"
+            android:contentDescription="Rap Album"
+            android:background="?android:attr/selectableItemBackground" />
+
+        <!-- Κουμπί για το "Laika Album" -->
+        <ImageButton
+            android:id="@+id/laikaAlbumImageButton"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginBottom="8dp"
+            android:src="@drawable/laika_album_cover"
+            android:contentDescription="Laika Album"
+            android:background="?android:attr/selectableItemBackground" />
+
+        <!-- Κουμπί για το "Top 100 Album" -->
+        <ImageButton
+            android:id="@+id/top100"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginBottom="8dp"
+            android:src="@drawable/top100"
+            android:contentDescription="Top 100 Album"
+            android:background="?android:attr/selectableItemBackground" />
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/tracksContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:textSize="30dp"
-        android:text="Albums" />
+        android:visibility="gone">
 
-</FrameLayout>
+        <!-- ProgressBar που δείχνει την φόρτωση -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+
+        <!-- RecyclerView για την εμφάνιση των τραγουδιών -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/tracksRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="16dp"
+            android:visibility="gone" />
+    </FrameLayout>
+</LinearLayout>

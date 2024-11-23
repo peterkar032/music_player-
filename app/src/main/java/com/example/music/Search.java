@@ -1,41 +1,35 @@
 package com.example.music;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
-
 import androidx.fragment.app.Fragment;
-
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.media.MediaPlayer;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.widget.ViewPager2;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.android.material.tabs.TabLayout;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import android.media.MediaPlayer;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -44,7 +38,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class Search extends Fragment {
     private RecyclerView recyclerView;
     private TrackAdapter trackAdapter;
@@ -52,12 +45,11 @@ public class Search extends Fragment {
     private ProgressBar progressBar;
     private EditText searchEditText;
     private MediaPlayer mediaPlayer;
-    private Button playPauseButton;  // Play/Pause button
+    private Button playPauseButton;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
         // Inflate the fragment layout
         View view = inflater.inflate(R.layout.fragment_search, container, false);
 
@@ -132,6 +124,21 @@ public class Search extends Fragment {
         // Update artist
         TextView artistTitleTextView = view.findViewById(R.id.ArtistTitle);
         artistTitleTextView.setText(track.getArtist());
+
+        // Add click listener for the artist's name
+        artistTitleTextView.setOnClickListener(v -> {
+            String artistName = track.getArtist();
+            searchArtistOnWeb(artistName);  // Open browser to search for the artist
+        });
+    }
+
+    // Method to open a web search for the artist
+    private void searchArtistOnWeb(String artistName) {
+        // Construct the search query URL
+        String searchQuery = "https://www.google.com/search?q=" + Uri.encode(artistName);
+        // Create an Intent to open the search query in the browser
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(searchQuery));
+        startActivity(intent);  // Open the web browser
     }
 
     private void playTrack(Track track) {
