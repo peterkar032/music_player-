@@ -43,6 +43,10 @@ jobs:
       - name: Build the APK
         run: ./gradlew assembleRelease
 
+      # List the contents of the APK output directory (for debugging)
+      - name: List APK output directory
+        run: ls -al app/build/outputs/apk/release/
+
       # Upload the APK as an artifact
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v3
