@@ -50,8 +50,9 @@ public class Albums extends Fragment {
 
         // Ρύθμιση RecyclerView
         trackAdapter = new TrackAdapter(trackList, track -> {
-            Toast.makeText(getContext(), "Playing: " + track.getTitle(), Toast.LENGTH_SHORT).show();
-        });
+            Toast.makeText(getContext(), "Track clicked: " + track.getTitle(), Toast.LENGTH_SHORT).show();
+        }
+    , getContext());
         tracksRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         tracksRecyclerView.setAdapter(trackAdapter);
 

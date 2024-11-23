@@ -4,34 +4,32 @@ public class Track {
     private String title;
     private String artist;
     private String trackUrl;
-    private String albumArtUrl;  // URL εικόνας άλμπουμ
+    private String albumArtUrl;
 
-    // Προεπιλεγμένες τιμές
-    private static final String DEFAULT_TITLE = "Unknown Title";
-    private static final String DEFAULT_ARTIST = "Unknown Artist";
-    private static final String DEFAULT_TRACK_URL = "";
-    private static final String DEFAULT_ALBUM_ART_URL = "";  // Μπορεί να αντικατασταθεί με ένα URL προς μια τοπική εικόνα
+    // Default constructor για το Firebase
+    public Track() {
+    }
 
     public Track(String title, String artist, String trackUrl, String albumArtUrl) {
-        this.title = (title != null && !title.isEmpty()) ? title : DEFAULT_TITLE;
-        this.artist = (artist != null && !artist.isEmpty()) ? artist : DEFAULT_ARTIST;
-        this.trackUrl = (trackUrl != null && !trackUrl.isEmpty()) ? trackUrl : DEFAULT_TRACK_URL;
-        this.albumArtUrl = (albumArtUrl != null && !albumArtUrl.isEmpty()) ? albumArtUrl : DEFAULT_ALBUM_ART_URL;
+        this.title = title;
+        this.artist = artist;
+        this.trackUrl = trackUrl;
+        this.albumArtUrl = albumArtUrl;
     }
 
     public String getTitle() {
-        return title != null ? title : DEFAULT_TITLE;
+        return title;
     }
 
     public String getArtist() {
-        return artist != null ? artist : DEFAULT_ARTIST;
+        return artist;
     }
 
     public String getTrackUrl() {
-        return trackUrl != null ? trackUrl : DEFAULT_TRACK_URL;
+        return trackUrl;
     }
 
     public String getAlbumArtUrl() {
-        return albumArtUrl != null ? albumArtUrl : DEFAULT_ALBUM_ART_URL;
+        return albumArtUrl;
     }
 }
