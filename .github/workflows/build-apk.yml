@@ -44,8 +44,16 @@ jobs:
         run: ./gradlew assembleRelease
 
       # List the contents of the APK output directory (for debugging)
-      - name: List APK output directory
-        run: ls -al app/build/outputs/apk/release/
+      - name: List APK output directory for debugging
+        run: |
+          echo "Listing contents of the app/build directory"
+          ls -al app/build
+          echo "Listing contents of the app/build/outputs directory"
+          ls -al app/build/outputs
+          echo "Listing contents of the app/build/outputs/apk directory"
+          ls -al app/build/outputs/apk
+          echo "Listing contents of the app/build/outputs/apk/release directory"
+          ls -al app/build/outputs/apk/release/
 
       # Upload the APK as an artifact
       - name: Upload APK Artifact
