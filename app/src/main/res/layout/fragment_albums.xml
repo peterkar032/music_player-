@@ -5,21 +5,20 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- Κουμπιά για την επιλογή άλμπουμ -->
+    <!-- Κουμπιά για την επιλογή άλμπουμ ως λίστα -->
     <LinearLayout
         android:id="@+id/albumButtonsContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:gravity="center">
 
         <!-- Κουμπί για το "Rap Album" -->
         <ImageButton
             android:id="@+id/rapAlbumImageButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_weight="1"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginBottom="8dp"
             android:src="@drawable/rap_album_cover"
             android:contentDescription="Rap Album"
             android:background="?android:attr/selectableItemBackground" />
@@ -27,10 +26,9 @@
         <!-- Κουμπί για το "Laika Album" -->
         <ImageButton
             android:id="@+id/laikaAlbumImageButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_weight="1"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginBottom="8dp"
             android:src="@drawable/laika_album_cover"
             android:contentDescription="Laika Album"
             android:background="?android:attr/selectableItemBackground" />
@@ -38,13 +36,13 @@
         <!-- Κουμπί για το "Top 100 Album" -->
         <ImageButton
             android:id="@+id/top100"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_weight="1"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginBottom="8dp"
             android:src="@drawable/top100"
             android:contentDescription="Top 100 Album"
             android:background="?android:attr/selectableItemBackground" />
+
     </LinearLayout>
 
     <FrameLayout
