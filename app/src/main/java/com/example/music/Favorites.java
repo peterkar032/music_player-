@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -32,17 +33,21 @@ public class Favorites extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_favorites, container, false);
 
-
         favoritesRecyclerView = rootView.findViewById(R.id.favoritesRecyclerView);
         favoritesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-
         favoriteTracks = new ArrayList<>();
-        trackAdapter = new TrackAdapter(favoriteTracks, track -> {
 
-        }, getContext());
+        // Δημιουργία του TrackAdapter με σωστό OnItemClickListener
+        trackAdapter = new TrackAdapter(favoriteTracks, new TrackAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Track track) {
+                // Δράση όταν κάνεις κλικ στο τραγούδι (π.χ., δείχνεις το τίτλο)
+                Toast.makeText(getContext(), "Clicked: " + track.getTitle(), Toast.LENGTH_SHORT).show();
+            }
+        }, getContext()); // Περνάμε το Context του Fragment
+
         favoritesRecyclerView.setAdapter(trackAdapter);
-
 
         loadFavoritesFromFirebase();
 
@@ -67,7 +72,7 @@ public class Favorites extends Fragment {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                // Αν υπάρχει σφάλμα, μπορείς να προσθέσεις κάποια ενέργεια, π.χ., toast για σφάλμα
             }
         });
     }

@@ -22,8 +22,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.squareup.picasso.Picasso;
@@ -63,12 +61,15 @@ public class Search extends Fragment {
         // Initialize RecyclerView and adapter
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Pass the context to the adapter
-        trackAdapter = new TrackAdapter(trackList, track -> {
-            // Play track and display details
-            displayTrackDetails(view, track);
-            playTrack(track);
-        }, requireContext()); // Pass the context here
+        // Pass the context to the adapter and provide the listener
+        trackAdapter = new TrackAdapter(trackList, new TrackAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Track track) {
+                // Play track and display details
+                displayTrackDetails(view, track);
+                playTrack(track);
+            }
+        }, getContext());
 
         recyclerView.setAdapter(trackAdapter);
 
@@ -102,7 +103,6 @@ public class Search extends Fragment {
 
         return view;
     }
-
 
     private void displayTrackDetails(View view, Track track) {
         // Update album art
