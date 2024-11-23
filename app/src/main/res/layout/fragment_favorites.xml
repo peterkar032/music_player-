@@ -5,10 +5,10 @@
     android:layout_height="match_parent"
     tools:context=".Favorites">
 
-    <TextView
+    <!-- RecyclerView για να εμφανίζει τη λίστα -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/favoritesRecyclerView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:textSize="30dp"
-        android:text="Favorites" />
+        android:layout_height="match_parent" />
 
 </FrameLayout>
