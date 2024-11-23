@@ -1,12 +1,15 @@
 name: Build APK and Create GitHub Release
 
 on:
-  push:
+  pull_request:
     branches:
-      - main  # Change to your default branch if necessary
+      - master
+    types:
+      - closed
 
 jobs:
   build-and-release:
+    if: github.event.pull_request.merged == true  # Ensures it only triggers for merged PRs
     name: Build and Release APK
     runs-on: ubuntu-latest
 
@@ -19,7 +22,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          distribution: amazon-corretto
+          distribution: 'corretto'
           java-version: '21'
           java-package: jdk
 
