@@ -104,7 +104,7 @@ public class Albums extends Fragment {
 
     private void loadLaikaTracks() {
         // Φόρτωση λαϊκών τραγουδιών μέσω API
-        String url = "https://api.deezer.com/search?q=laika_greek";
+        String url = "https://api.deezer.com/search?q=greek_laiko";
         loadTracksFromApi(url);
     }
 
