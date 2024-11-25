@@ -24,9 +24,9 @@ android {
 
     // Set custom APK name
     applicationVariants.all { variant ->
-        if (variant.buildType.name == "release") {
+        if (variant.buildType.name == "debug") {
             variant.outputs.all { output ->
-            output.outputFileName = "music-app-release.apk"
+            output.outputFileName = "music-app-debug.apk"
             }
         }
     }
