@@ -41,7 +41,7 @@ jobs:
 
       # Build the APK
       - name: Build the APK
-        run: ./gradlew assembleRelease
+        run: ./gradlew assembleDebug
 
       # List the contents of the APK output directory (for debugging)
       - name: List APK output directory for debugging
