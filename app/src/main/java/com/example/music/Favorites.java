@@ -51,7 +51,7 @@ public class Favorites extends Fragment {
                 // Πρόθεση για άνοιγμα στον browser
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setData(Uri.parse(url));
-                intent.setPackage("com.android.chrome"); // Χρήση του Chrome browser
+               // intent.setPackage("com.android.chrome"); // Χρήση του Chrome browser
 
                 try {
                     startActivity(intent);

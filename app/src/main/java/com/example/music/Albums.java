@@ -58,7 +58,7 @@ public class Albums extends Fragment {
             // Δημιουργία πρόθεσης για άνοιγμα στον browser
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse(url));
-            intent.setPackage("com.android.chrome"); // Εξασφάλιση ότι θα χρησιμοποιηθεί browser, όχι εφαρμογή YouTube
+           // intent.setPackage("com.android.chrome"); // Εξασφάλιση ότι θα χρησιμοποιηθεί browser, όχι εφαρμογή YouTube
 
             // Άνοιγμα στον browser
             try {
