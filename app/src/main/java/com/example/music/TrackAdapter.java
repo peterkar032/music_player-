@@ -1,7 +1,6 @@
 package com.example.music;
 
 import android.content.Context;
-import android.content.Intent;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -20,24 +19,27 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+
+// Πρόσθεση του context ως παράμετρο στον κατασκευαστή
 public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHolder> {
 
     private final List<Track> trackList;
     private final OnItemClickListener onItemClickListener;
-    private final Context context; // Ορισμός του context
+    private final Context context; // Ορισμός του context ως πεδίο
     private DatabaseReference likesRef;
 
     public interface OnItemClickListener {
         void onItemClick(Track track);
     }
 
-    // Κατασκευαστής που λαμβάνει τη λίστα, τον listener και το context
+    // Ο κατασκευαστής ζητά και το context
     public TrackAdapter(List<Track> trackList, OnItemClickListener onItemClickListener, Context context) {
         this.trackList = trackList;
         this.onItemClickListener = onItemClickListener;
-        this.context = context;
+        this.context = context; // Εδώ το context χρησιμοποιείται κανονικά
         likesRef = FirebaseDatabase.getInstance().getReference("likes");
     }
+
 
     @NonNull
     @Override
@@ -60,26 +62,6 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
                 .placeholder(R.drawable.music)
                 .error(R.drawable.music1)
                 .into(holder.albumArtImageView);
-
-        // Click στο όνομα τραγουδιού για άνοιγμα στο browser
-        holder.trackTitleTextView.setOnClickListener(v -> {
-            String query = currentTrack.getTitle() + " " + currentTrack.getArtist();
-            String youtubeSearchUrl = "https://www.youtube.com/results?search_query=" + query.replace(" ", "+");
-
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(android.net.Uri.parse(youtubeSearchUrl));
-
-            // Καθορισμός του browser ως προεπιλεγμένου προγράμματος
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.setPackage("com.android.chrome"); // Προαιρετικό: Για χρήση συγκεκριμένου browser (Google Chrome)
-
-            // Έλεγχος αν υπάρχει browser για να ανοίξει το URL
-            if (intent.resolveActivity(context.getPackageManager()) != null) {
-                context.startActivity(intent);
-            } else {
-                Toast.makeText(context, "No browser found to open YouTube", Toast.LENGTH_SHORT).show();
-            }
-        });
 
         // Click για επιλογή τραγουδιού
         holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(currentTrack));

@@ -1,5 +1,7 @@
 package com.example.music;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,10 +44,24 @@ public class Favorites extends Fragment {
         trackAdapter = new TrackAdapter(favoriteTracks, new TrackAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Track track) {
-                // Δράση όταν κάνεις κλικ στο τραγούδι (π.χ., δείχνεις το τίτλο)
-                Toast.makeText(getContext(), "Clicked: " + track.getTitle(), Toast.LENGTH_SHORT).show();
+                // Δημιουργία YouTube URL για αναζήτηση
+                String query = track.getTitle() + " " + track.getArtist();
+                String url = "https://www.youtube.com/results?search_query=" + Uri.encode(query);
+
+                // Πρόθεση για άνοιγμα στον browser
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(url));
+                intent.setPackage("com.android.chrome"); // Χρήση του Chrome browser
+
+                try {
+                    startActivity(intent);
+                } catch (Exception e) {
+                    // Fallback: Άνοιγμα στον προεπιλεγμένο browser αν δεν υπάρχει ο Chrome
+                    intent.setPackage(null);
+                    startActivity(intent);
+                }
             }
-        }, getContext()); // Περνάμε το Context του Fragment
+        }, getContext());
 
         favoritesRecyclerView.setAdapter(trackAdapter);
 
@@ -72,7 +88,7 @@ public class Favorites extends Fragment {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                // Αν υπάρχει σφάλμα, μπορείς να προσθέσεις κάποια ενέργεια, π.χ., toast για σφάλμα
+                Toast.makeText(getContext(), "Error loading favorites: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
