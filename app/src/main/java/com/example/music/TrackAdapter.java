@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -19,27 +20,25 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-
-// Πρόσθεση του context ως παράμετρο στον κατασκευαστή
 public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHolder> {
 
     private final List<Track> trackList;
     private final OnItemClickListener onItemClickListener;
-    private final Context context; // Ορισμός του context ως πεδίο
+    private final Context context;
     private DatabaseReference likesRef;
+    private DatabaseReference playlistsRef;
 
     public interface OnItemClickListener {
         void onItemClick(Track track);
     }
 
-    // Ο κατασκευαστής ζητά και το context
     public TrackAdapter(List<Track> trackList, OnItemClickListener onItemClickListener, Context context) {
         this.trackList = trackList;
         this.onItemClickListener = onItemClickListener;
-        this.context = context; // Εδώ το context χρησιμοποιείται κανονικά
+        this.context = context;
         likesRef = FirebaseDatabase.getInstance().getReference("likes");
+        playlistsRef = FirebaseDatabase.getInstance().getReference("playlists");
     }
-
 
     @NonNull
     @Override
@@ -52,24 +51,28 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
     public void onBindViewHolder(@NonNull TrackViewHolder holder, int position) {
         Track currentTrack = trackList.get(position);
 
-        // Ενημέρωση δεδομένων
+        // Update track title and artist
         holder.trackTitleTextView.setText(currentTrack.getTitle());
         holder.artistTextView.setText(currentTrack.getArtist());
 
-        // Φόρτωση εικόνας εξωφύλλου
+        // Load album art image
         Picasso.get()
                 .load(currentTrack.getAlbumArtUrl())
                 .placeholder(R.drawable.music)
                 .error(R.drawable.music1)
                 .into(holder.albumArtImageView);
 
-        // Click για επιλογή τραγουδιού
+        // Set click listener for selecting the track
         holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(currentTrack));
 
-        // Ρύθμιση context menu
+        // Set context menu listener
         holder.itemView.setOnCreateContextMenuListener((menu, v, menuInfo) -> {
             menu.add(Menu.NONE, R.id.menu_like, Menu.NONE, "Like").setOnMenuItemClickListener(item -> {
-                saveToFirebase(currentTrack); // Αποθήκευση στο Firebase
+                saveToFirebase(currentTrack);
+                return true;
+            });
+            menu.add(Menu.NONE, R.id.menu_add_to_playlist, Menu.NONE, "Add to Playlist").setOnMenuItemClickListener(item -> {
+                showPlaylistDialog(currentTrack);
                 return true;
             });
         });
@@ -82,7 +85,7 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
 
     private void saveToFirebase(Track track) {
         try {
-            String trackId = likesRef.push().getKey(); // Δημιουργία μοναδικού ID
+            String trackId = likesRef.push().getKey(); // Generate unique ID
             if (trackId != null) {
                 likesRef.child(trackId).setValue(track).addOnSuccessListener(aVoid ->
                         Toast.makeText(context, "Track liked: " + track.getTitle(), Toast.LENGTH_SHORT).show()
@@ -97,7 +100,13 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
         }
     }
 
-    public static class TrackViewHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener {
+    private void showPlaylistDialog(Track track) {
+        // Display a dialog to choose between creating a new playlist or adding to an existing one
+        PlaylistDialog dialog = new PlaylistDialog(context, playlistsRef, track);
+        dialog.show();
+    }
+
+    public static class TrackViewHolder extends RecyclerView.ViewHolder {
         public TextView trackTitleTextView;
         public TextView artistTextView;
         public ImageView albumArtImageView;
@@ -107,14 +116,6 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
             trackTitleTextView = itemView.findViewById(R.id.trackTitleTextView);
             artistTextView = itemView.findViewById(R.id.artistTextView);
             albumArtImageView = itemView.findViewById(R.id.albumArtImageView);
-
-            // Ενεργοποίηση του context menu
-            itemView.setOnCreateContextMenuListener(this);
-        }
-
-        @Override
-        public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-            // Ορίζεται στο onBindViewHolder
         }
     }
 }
