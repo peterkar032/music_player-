@@ -55,12 +55,17 @@ jobs:
           echo "Listing contents of the app/build/outputs/apk/release directory"
           ls -al app/build/outputs/apk/debug/
 
+      # Extract commits with 'feat' and save to output
+      - name: Extract 'feat' commits
+        id: feat_commits
+        run: echo "::set-output name=commits::$(git log --grep '^feat' HEAD --pretty=format:'- %s')"
+
       # Upload the APK as an artifact
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v3
         with:
           name: MyApp-APK
-          path: app/build/outputs/apk/debug/music-app-debug.apk  # Adjust path as necessary
+          path: app/build/outputs/apk/debug/DJ-Felix-debug.apk  # Adjust path as necessary
 
       # Create a Release on GitHub
       - name: Create GitHub Release
@@ -70,9 +75,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v${{ github.run_number }}
-          release_name: APK Release v${{ github.run_number }}
+          release_name: DJ_Felix Release v${{ github.run_number }}
           body: |
             This release contains the latest build of the APK.
+          Feature_Commits: ${{ steps.feat_commits.outputs.commits }}
           draft: false
           prerelease: false
 
@@ -84,6 +90,6 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: app/build/outputs/apk/debug/music-app-debug.apk  # Adjust path as necessary
-          asset_name: MyApp-v${{ github.run_number }}.apk
+          asset_name: DJ_Felix-v${{ github.run_number }}.apk
           asset_content_type: application/vnd.android.package-archive
 
