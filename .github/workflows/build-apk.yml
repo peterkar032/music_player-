@@ -89,7 +89,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: app/build/outputs/apk/debug/music-app-debug.apk  # Adjust path as necessary
+          asset_path: app/build/outputs/apk/debug/DJ-Felix-debug.apk  # Adjust path as necessary
           asset_name: DJ-Felix-v${{ github.run_number }}.apk
           asset_content_type: application/vnd.android.package-archive
 
