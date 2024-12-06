@@ -26,7 +26,7 @@ android {
     applicationVariants.all { variant ->
         if (variant.buildType.name == "debug") {
             variant.outputs.all { output ->
-            output.outputFileName = "music-app-debug.apk"
+            output.outputFileName = "DJ-Felix-debug.apk"
             }
         }
     }

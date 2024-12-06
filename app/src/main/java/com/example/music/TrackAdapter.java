@@ -52,6 +52,7 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
     public void onBindViewHolder(@NonNull TrackViewHolder holder, int position) {
         Track currentTrack = trackList.get(position);
 
+
         holder.trackTitleTextView.setText(currentTrack.getTitle());
         holder.artistTextView.setText(currentTrack.getArtist());
 
@@ -84,6 +85,7 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
         });
 
         holder.itemView.setLongClickable(true);
+
     }
 
     @Override
@@ -92,6 +94,7 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
     }
 
     private void saveToFirebase(Track track) {
+
         String trackId = likesRef.push().getKey();
         if (trackId != null) {
             likesRef.child(trackId).setValue(track)
