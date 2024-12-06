@@ -91,7 +91,6 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
         return trackList != null ? trackList.size() : 0;
     }
 
-
     private void saveToFirebase(Track track) {
         String trackId = likesRef.push().getKey();
         if (trackId != null) {
@@ -107,7 +106,6 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
                     );
         }
     }
-
 
     private void removeFromFirebase(Track track, int position) {
         likesRef.orderByChild("title").equalTo(track.getTitle()).addListenerForSingleValueEvent(new ValueEventListener() {

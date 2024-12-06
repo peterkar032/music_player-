@@ -1,5 +1,7 @@
 package com.example.music;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -32,16 +34,25 @@ public class Favorites extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_favorites, container, false);
 
-
         recyclerView = view.findViewById(R.id.favoritesRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         likesRef = FirebaseDatabase.getInstance().getReference("likes");
 
-        trackAdapter = new TrackAdapter(favoriteTracks, new TrackAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(Track track) {
+        // Προσθήκη της λειτουργίας YouTube στον OnItemClickListener
+        trackAdapter = new TrackAdapter(favoriteTracks, track -> {
+            // Δημιουργία YouTube URL με αναζήτηση
+            String query = track.getTitle() + " " + track.getArtist();
+            String url = "https://www.youtube.com/results?search_query=" + Uri.encode(query);
 
+            // Άνοιγμα του URL
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(url));
+            try {
+                startActivity(intent);
+            } catch (Exception e) {
+                intent.setPackage(null); // Απενεργοποίηση συγκεκριμένου πακέτου αν υπάρχει πρόβλημα
+                startActivity(intent);
             }
         }, getContext());
 
@@ -72,7 +83,6 @@ public class Favorites extends Fragment {
         });
     }
 
-    // Μέθοδος για το "Unlike"
     private void removeFromFavorites(Track track) {
         Query trackQuery = likesRef.orderByChild("title").equalTo(track.getTitle());
         trackQuery.get().addOnCompleteListener(task -> {
@@ -90,11 +100,10 @@ public class Favorites extends Fragment {
         });
     }
 
-    // Παράδειγμα λειτουργίας για το context menu με "Unlike"
     private void showContextMenu(View view, Track track) {
         view.setOnCreateContextMenuListener((menu, v, menuInfo) -> {
             menu.add(Menu.NONE, R.id.menu_unlike, Menu.NONE, "Unlike").setOnMenuItemClickListener(item -> {
-                removeFromFavorites(track); // Αφαίρεση από τα αγαπημένα
+                removeFromFavorites(track);
                 return true;
             });
         });

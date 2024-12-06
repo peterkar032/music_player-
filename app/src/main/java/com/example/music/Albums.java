@@ -1,12 +1,13 @@
 package com.example.music;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -43,16 +44,27 @@ public class Albums extends Fragment {
         View view = inflater.inflate(R.layout.fragment_albums, container, false);
 
         // Εύρεση στοιχείων UI
-        albumButtonsContainer = view.findViewById(R.id.albumButtonsContainer);  // Το LinearLayout που περιέχει τα κουμπιά
+        albumButtonsContainer = view.findViewById(R.id.albumButtonsContainer);
         tracksRecyclerView = view.findViewById(R.id.tracksRecyclerView);
         progressBar = view.findViewById(R.id.progressBar);
         tracksContainer = view.findViewById(R.id.tracksContainer);
 
-        // Ρύθμιση RecyclerView
         trackAdapter = new TrackAdapter(trackList, track -> {
-            Toast.makeText(getContext(), "Track clicked: " + track.getTitle(), Toast.LENGTH_SHORT).show();
-        }
-    , getContext());
+            // Δημιουργία YouTube URL με αναζήτηση
+            String query = track.getTitle() + " " + track.getArtist();
+            String url = "https://www.youtube.com/results?search_query=" + Uri.encode(query);
+
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(url));
+
+            try {
+                startActivity(intent);
+            } catch (Exception e) {
+                intent.setPackage(null);
+                startActivity(intent);
+            }
+        }, getContext()); // Η τέταρτη παράμετρος
+
         tracksRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         tracksRecyclerView.setAdapter(trackAdapter);
 
@@ -94,31 +106,31 @@ public class Albums extends Fragment {
     }
 
     private void showTracksContainer() {
-        albumButtonsContainer.setVisibility(View.GONE);  // Κρύβουμε τα κουμπιά
+        albumButtonsContainer.setVisibility(View.GONE);
         tracksContainer.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.VISIBLE);
-        tracksRecyclerView.setVisibility(View.GONE); // Αρχικά το RecyclerView είναι κρυφό
+        tracksRecyclerView.setVisibility(View.GONE);
     }
 
     private void hideTracksContainer() {
-        albumButtonsContainer.setVisibility(View.VISIBLE); // Επαναφορά των κουμπιών άλμπουμ
+        albumButtonsContainer.setVisibility(View.VISIBLE);
         tracksContainer.setVisibility(View.GONE);
         progressBar.setVisibility(View.GONE);
         tracksRecyclerView.setVisibility(View.GONE);
     }
 
     private void loadRapTracks() {
-        String url = "https://api.deezer.com/chart/116/tracks"; // URL για το rap album
+        String url = "https://api.deezer.com/chart/116/tracks";
         loadTracksFromApi(url);
     }
 
     private void loadLaikaTracks() {
-        String url = "https://api.deezer.com/search?q=greek_laiko"; // URL για το laika album
+        String url = "https://api.deezer.com/search?q=greek_laiko";
         loadTracksFromApi(url);
     }
 
     private void loadTop100Tracks() {
-        String url = "https://api.deezer.com/chart/0/tracks?limit=100"; // URL για τα κορυφαία 100 τραγούδια
+        String url = "https://api.deezer.com/chart/0/tracks?limit=100";
         loadTracksFromApi(url);
     }
 
@@ -126,13 +138,12 @@ public class Albums extends Fragment {
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 response -> {
                     try {
-                        progressBar.setVisibility(View.GONE); // Απόκρυψη του ProgressBar μόλις ληφθούν τα δεδομένα
+                        progressBar.setVisibility(View.GONE);
 
                         if (response.has("data")) {
                             JSONArray tracksArray = response.getJSONArray("data");
-                            trackList.clear(); // Καθαρισμός της λίστας πριν την προσθήκη νέων τραγουδιών
+                            trackList.clear();
 
-                            // Ανάγνωση των τραγουδιών από την απάντηση
                             for (int i = 0; i < tracksArray.length(); i++) {
                                 JSONObject trackJson = tracksArray.getJSONObject(i);
 
@@ -144,11 +155,10 @@ public class Albums extends Fragment {
                                 trackList.add(new Track(trackTitle, artist, trackUrl, albumArtUrl));
                             }
 
-                            // Ενημέρωση του RecyclerView με τα νέα δεδομένα
                             if (trackList.isEmpty()) {
                                 Toast.makeText(getContext(), "No tracks found.", Toast.LENGTH_SHORT).show();
                             } else {
-                                trackAdapter.notifyDataSetChanged();  // Ενημέρωση του Adapter για τα νέα δεδομένα
+                                trackAdapter.notifyDataSetChanged();
                                 tracksRecyclerView.setVisibility(View.VISIBLE);
                             }
                         } else {
@@ -156,17 +166,16 @@ public class Albums extends Fragment {
                         }
                     } catch (Exception e) {
                         Log.e("Response Error", "Error parsing response", e);
-                        progressBar.setVisibility(View.GONE); // Απόκρυψη του ProgressBar σε περίπτωση λάθους
+                        progressBar.setVisibility(View.GONE);
                         Toast.makeText(getContext(), "Error processing response.", Toast.LENGTH_SHORT).show();
                     }
                 },
                 error -> {
                     Log.e("Network Error", "Error: " + error.getMessage());
-                    progressBar.setVisibility(View.GONE); // Απόκρυψη του ProgressBar σε περίπτωση λάθους δικτύου
+                    progressBar.setVisibility(View.GONE);
                     Toast.makeText(getContext(), "Network error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
                 });
 
-        // Προσθήκη της αίτησης στην ουρά του Volley
         Volley.newRequestQueue(requireContext()).add(jsonObjectRequest);
     }
 }
