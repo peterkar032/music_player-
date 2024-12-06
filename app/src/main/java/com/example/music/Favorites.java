@@ -4,12 +4,12 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,61 +18,51 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Favorites extends Fragment {
-
-    private RecyclerView favoritesRecyclerView;
+    private RecyclerView recyclerView;
     private TrackAdapter trackAdapter;
-    private List<Track> favoriteTracks;
+    private List<Track> favoriteTracks = new ArrayList<>();
     private DatabaseReference likesRef;
 
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_favorites, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_favorites, container, false);
 
-        favoritesRecyclerView = rootView.findViewById(R.id.favoritesRecyclerView);
-        favoritesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView = view.findViewById(R.id.favoritesRecyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        favoriteTracks = new ArrayList<>();
+        likesRef = FirebaseDatabase.getInstance().getReference("likes");
 
-        // Δημιουργία του TrackAdapter με σωστό OnItemClickListener
-        trackAdapter = new TrackAdapter(favoriteTracks, new TrackAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(Track track) {
-                // Δημιουργία YouTube URL για αναζήτηση
-                String query = track.getTitle() + " " + track.getArtist();
-                String url = "https://www.youtube.com/results?search_query=" + Uri.encode(query);
+        // Προσθήκη της λειτουργίας YouTube στον OnItemClickListener
+        trackAdapter = new TrackAdapter(favoriteTracks, track -> {
+            // Δημιουργία YouTube URL με αναζήτηση
+            String query = track.getTitle() + " " + track.getArtist();
+            String url = "https://www.youtube.com/results?search_query=" + Uri.encode(query);
 
-                // Πρόθεση για άνοιγμα στον browser
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse(url));
-               // intent.setPackage("com.android.chrome"); // Χρήση του Chrome browser
-
-                try {
-                    startActivity(intent);
-                } catch (Exception e) {
-                    // Fallback: Άνοιγμα στον προεπιλεγμένο browser αν δεν υπάρχει ο Chrome
-                    intent.setPackage(null);
-                    startActivity(intent);
-                }
+            // Άνοιγμα του URL
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(url));
+            try {
+                startActivity(intent);
+            } catch (Exception e) {
+                intent.setPackage(null); // Απενεργοποίηση συγκεκριμένου πακέτου αν υπάρχει πρόβλημα
+                startActivity(intent);
             }
         }, getContext());
 
-        favoritesRecyclerView.setAdapter(trackAdapter);
+        recyclerView.setAdapter(trackAdapter);
+        loadFavoriteTracks();
 
-        loadFavoritesFromFirebase();
-
-        return rootView;
+        return view;
     }
 
-    private void loadFavoritesFromFirebase() {
-        likesRef = FirebaseDatabase.getInstance().getReference("likes");
-
+    private void loadFavoriteTracks() {
         likesRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -88,8 +78,34 @@ public class Favorites extends Fragment {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(getContext(), "Error loading favorites: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Failed to load favorite tracks.", Toast.LENGTH_SHORT).show();
             }
+        });
+    }
+
+    private void removeFromFavorites(Track track) {
+        Query trackQuery = likesRef.orderByChild("title").equalTo(track.getTitle());
+        trackQuery.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                for (DataSnapshot snapshot : task.getResult().getChildren()) {
+                    snapshot.getRef().removeValue().addOnSuccessListener(aVoid -> {
+                        Toast.makeText(getContext(), "Track removed from favorites.", Toast.LENGTH_SHORT).show();
+                    }).addOnFailureListener(e -> {
+                        Toast.makeText(getContext(), "Failed to remove track.", Toast.LENGTH_SHORT).show();
+                    });
+                }
+            } else {
+                Toast.makeText(getContext(), "Track not found.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void showContextMenu(View view, Track track) {
+        view.setOnCreateContextMenuListener((menu, v, menuInfo) -> {
+            menu.add(Menu.NONE, R.id.menu_unlike, Menu.NONE, "Unlike").setOnMenuItemClickListener(item -> {
+                removeFromFavorites(track);
+                return true;
+            });
         });
     }
 }

@@ -49,26 +49,22 @@ public class Albums extends Fragment {
         progressBar = view.findViewById(R.id.progressBar);
         tracksContainer = view.findViewById(R.id.tracksContainer);
 
-        // Ρύθμιση RecyclerView
         trackAdapter = new TrackAdapter(trackList, track -> {
             // Δημιουργία YouTube URL με αναζήτηση
             String query = track.getTitle() + " " + track.getArtist();
             String url = "https://www.youtube.com/results?search_query=" + Uri.encode(query);
 
-            // Δημιουργία πρόθεσης για άνοιγμα στον browser
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse(url));
-           // intent.setPackage("com.android.chrome"); // Εξασφάλιση ότι θα χρησιμοποιηθεί browser, όχι εφαρμογή YouTube
 
-            // Άνοιγμα στον browser
             try {
                 startActivity(intent);
             } catch (Exception e) {
-                // Αν ο Chrome δεν είναι εγκατεστημένος, ανοίγει ο προεπιλεγμένος browser
                 intent.setPackage(null);
                 startActivity(intent);
             }
-        }, getContext());
+        }, getContext()); // Η τέταρτη παράμετρος
+
         tracksRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         tracksRecyclerView.setAdapter(trackAdapter);
 
