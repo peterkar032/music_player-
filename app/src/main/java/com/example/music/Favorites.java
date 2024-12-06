@@ -2,12 +2,12 @@ package com.example.music;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,47 +16,42 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Favorites extends Fragment {
-
-    private RecyclerView favoritesRecyclerView;
+    private RecyclerView recyclerView;
     private TrackAdapter trackAdapter;
-    private List<Track> favoriteTracks;
+    private List<Track> favoriteTracks = new ArrayList<>();
     private DatabaseReference likesRef;
 
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_favorites, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_favorites, container, false);
 
-        favoritesRecyclerView = rootView.findViewById(R.id.favoritesRecyclerView);
-        favoritesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        favoriteTracks = new ArrayList<>();
+        recyclerView = view.findViewById(R.id.favoritesRecyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Δημιουργία του TrackAdapter με σωστό OnItemClickListener
+        likesRef = FirebaseDatabase.getInstance().getReference("likes");
+
         trackAdapter = new TrackAdapter(favoriteTracks, new TrackAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Track track) {
-                // Δράση όταν κάνεις κλικ στο τραγούδι (π.χ., δείχνεις το τίτλο)
-                Toast.makeText(getContext(), "Clicked: " + track.getTitle(), Toast.LENGTH_SHORT).show();
+
             }
-        }, getContext()); // Περνάμε το Context του Fragment
+        }, getContext());
 
-        favoritesRecyclerView.setAdapter(trackAdapter);
+        recyclerView.setAdapter(trackAdapter);
+        loadFavoriteTracks();
 
-        loadFavoritesFromFirebase();
-
-        return rootView;
+        return view;
     }
 
-    private void loadFavoritesFromFirebase() {
-        likesRef = FirebaseDatabase.getInstance().getReference("likes");
-
+    private void loadFavoriteTracks() {
         likesRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -72,8 +67,36 @@ public class Favorites extends Fragment {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                // Αν υπάρχει σφάλμα, μπορείς να προσθέσεις κάποια ενέργεια, π.χ., toast για σφάλμα
+                Toast.makeText(getContext(), "Failed to load favorite tracks.", Toast.LENGTH_SHORT).show();
             }
+        });
+    }
+
+    // Μέθοδος για το "Unlike"
+    private void removeFromFavorites(Track track) {
+        Query trackQuery = likesRef.orderByChild("title").equalTo(track.getTitle());
+        trackQuery.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                for (DataSnapshot snapshot : task.getResult().getChildren()) {
+                    snapshot.getRef().removeValue().addOnSuccessListener(aVoid -> {
+                        Toast.makeText(getContext(), "Track removed from favorites.", Toast.LENGTH_SHORT).show();
+                    }).addOnFailureListener(e -> {
+                        Toast.makeText(getContext(), "Failed to remove track.", Toast.LENGTH_SHORT).show();
+                    });
+                }
+            } else {
+                Toast.makeText(getContext(), "Track not found.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // Παράδειγμα λειτουργίας για το context menu με "Unlike"
+    private void showContextMenu(View view, Track track) {
+        view.setOnCreateContextMenuListener((menu, v, menuInfo) -> {
+            menu.add(Menu.NONE, R.id.menu_unlike, Menu.NONE, "Unlike").setOnMenuItemClickListener(item -> {
+                removeFromFavorites(track); // Αφαίρεση από τα αγαπημένα
+                return true;
+            });
         });
     }
 }

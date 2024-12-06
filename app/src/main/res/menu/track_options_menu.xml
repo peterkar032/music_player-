@@ -2,10 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/menu_like"
-        android:title="Like"
-         />
+        android:title="Like" />
+    <item
+        android:id="@+id/menu_unlike"
+        android:title="Unlike" />
     <item
         android:id="@+id/menu_add_to_playlist"
-        android:title="Add to Playlist"
-        />
+        android:title="Add to Playlist" />
 </menu>

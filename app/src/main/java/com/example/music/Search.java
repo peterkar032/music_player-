@@ -65,11 +65,11 @@ public class Search extends Fragment {
         trackAdapter = new TrackAdapter(trackList, new TrackAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Track track) {
-                // Play track and display details
                 displayTrackDetails(view, track);
                 playTrack(track);
             }
-        }, getContext());
+        }, getContext()); // Προσθέσαμε την παράμετρο boolean
+
 
         recyclerView.setAdapter(trackAdapter);
 
