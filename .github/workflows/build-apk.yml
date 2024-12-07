@@ -44,21 +44,15 @@ jobs:
         run: ./gradlew assembleDebug
 
       # List the contents of the APK output directory (for debugging)
-      - name: List APK output directory for debugging
+      - name: Verify APK Path
         run: |
-          echo "Listing contents of the app/build directory"
-          ls -al app/build
-          echo "Listing contents of the app/build/outputs directory"
-          ls -al app/build/outputs
-          echo "Listing contents of the app/build/outputs/apk directory"
-          ls -al app/build/outputs/apk
-          echo "Listing contents of the app/build/outputs/apk/release directory"
           ls -al app/build/outputs/apk/debug/
+          echo "APK build completed successfully."
 
       # Extract commits with 'feat' and save to output
       - name: Extract 'feat' commits
-        id: feat_commits
-        run: echo "::set-output name=commits::$(git log --grep '^feat' HEAD --pretty=format:'- %s')"
+        run: |
+          echo "commits=$(git log --grep '^feat' HEAD --pretty=format:'- %s')" >> $GITHUB_ENV
 
       # Upload the APK as an artifact
       - name: Upload APK Artifact
@@ -78,7 +72,8 @@ jobs:
           release_name: DJ_Felix Release v${{ github.run_number }}
           body: |
             This release contains the latest build of the APK.
-          Feature_Commits: ${{ steps.feat_commits.outputs.commits }}
+            Feature Commits:
+            ${{ env.commits }}
           draft: false
           prerelease: false
 
