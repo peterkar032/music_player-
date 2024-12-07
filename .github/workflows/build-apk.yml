@@ -17,6 +17,8 @@ jobs:
       # Checkout the repository
       - name: Checkout Code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       # Set up JDK for Android
       - name: Set up JDK
@@ -52,8 +54,16 @@ jobs:
       # Extract commits with 'feat' and save to output
       - name: Extract 'feat' commits
         run: |
-          echo "commits=$(git log --grep '^feat' HEAD --pretty=format:'- %s')" >> $GITHUB_ENV
-
+         commits=$(git log --grep 'feat' HEAD --pretty=format:'- %s')
+         if [ -z "$commits" ]; then
+           commits="No feature commits found."
+         fi
+         echo "commits=$commits" >> $GITHUB_ENV
+      
+      # Debug the Git Log Command
+      - name: Debug Git Log  
+        run: git log --grep 'feat' HEAD --pretty=format:'- %s'
+         
       # Upload the APK as an artifact
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v3
@@ -72,7 +82,8 @@ jobs:
           release_name: DJ_Felix Release v${{ github.run_number }}
           body: |
             This release contains the latest build of the APK.
-            Feature Commits:
+            
+            **Feature Commits:**
             ${{ env.commits }}
           draft: false
           prerelease: false
