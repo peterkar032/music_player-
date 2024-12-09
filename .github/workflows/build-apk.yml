@@ -59,7 +59,7 @@ jobs:
            commits="No feature commits found."
          fi
          echo "Extracted commits: $commits"
-         echo "commits=$commits" >> $GITHUB_ENV
+         echo "commits=$(echo "$commits" | sed ':a;N;$!ba;s/\n/\\n/g')" >> $GITHUB_ENV
       
       # Debug the Git Log Command
       - name: Debug Git Log  
