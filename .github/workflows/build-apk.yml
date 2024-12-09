@@ -54,15 +54,16 @@ jobs:
       # Extract commits with 'feat' and save to output
       - name: Extract 'feat' commits
         run: |
-         commits=$(git log --grep 'feat' HEAD --pretty=format:'- %s')
+         commits=$(git log --grep '^feat:' HEAD --pretty=format:'- %s')
          if [ -z "$commits" ]; then
            commits="No feature commits found."
          fi
+         echo "Extracted commits: $commits"
          echo "commits=$commits" >> $GITHUB_ENV
       
       # Debug the Git Log Command
       - name: Debug Git Log  
-        run: git log --grep 'feat' HEAD --pretty=format:'- %s'
+        run: git log --grep '^feat:' HEAD --pretty=format:'- %s'
          
       # Upload the APK as an artifact
       - name: Upload APK Artifact
