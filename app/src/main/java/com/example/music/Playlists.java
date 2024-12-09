@@ -1,18 +1,80 @@
 package com.example.music;
 
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class Playlists extends Fragment {
 
+    private RecyclerView recyclerView;
+    private PlaylistAdapter playlistAdapter;
+    private List<Playlist> playlistList;
+    private DatabaseReference playlistsRef;
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_playlists, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_playlists, container, false);
+
+        recyclerView = view.findViewById(R.id.recyclerViewPlaylists);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        playlistList = new ArrayList<>();
+        playlistAdapter = new PlaylistAdapter(playlistList, getContext());
+        recyclerView.setAdapter(playlistAdapter);
+
+        playlistsRef = FirebaseDatabase.getInstance().getReference("playlists");
+
+
+        playlistsRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                playlistList.clear();
+                for (DataSnapshot playlistSnapshot : snapshot.getChildren()) {
+                    String playlistName = playlistSnapshot.getKey();
+
+
+                    DataSnapshot tracksSnapshot = playlistSnapshot.child("tracks");
+                    int numberOfTracks = 0;
+
+                    if (tracksSnapshot.exists()) {
+
+                        numberOfTracks = (int) tracksSnapshot.getChildrenCount();
+                    }
+
+                    Playlist playlist = new Playlist(playlistName, numberOfTracks);
+                    playlistList.add(playlist);
+
+                }
+
+
+                playlistAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        return view;
     }
 }
+
