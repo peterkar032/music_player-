@@ -1,6 +1,7 @@
 package com.example.music;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,16 +16,21 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
 
     private List<Playlist> playlistList;
     private Context context;
+    private OnPlaylistClickListener onPlaylistClickListener;
 
-    public PlaylistAdapter(List<Playlist> playlistList, Context context) {
+    public interface OnPlaylistClickListener {
+        void onPlaylistClick(Playlist playlist);
+    }
+
+    public PlaylistAdapter(List<Playlist> playlistList, Context context, OnPlaylistClickListener onPlaylistClickListener) {
         this.playlistList = playlistList;
         this.context = context;
+        this.onPlaylistClickListener = onPlaylistClickListener;
     }
 
     @NonNull
     @Override
     public PlaylistViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Δημιουργία του item view για κάθε playlist
         View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_playlist, parent, false);
         return new PlaylistViewHolder(itemView);
     }
@@ -32,10 +38,15 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     @Override
     public void onBindViewHolder(@NonNull PlaylistViewHolder holder, int position) {
         Playlist currentPlaylist = playlistList.get(position);
-
-        // Ορισμός του ονόματος και του αριθμού των τραγουδιών
         holder.playlistNameTextView.setText(currentPlaylist.getName());
         holder.trackCountTextView.setText(currentPlaylist.getNumberOfTracks() + " Tracks");
+
+        holder.itemView.setOnClickListener(v -> {
+            Log.d("PlaylistAdapter", "Clicked on: " + currentPlaylist.getName());
+            if (onPlaylistClickListener != null) {
+                onPlaylistClickListener.onPlaylistClick(currentPlaylist);
+            }
+        });
     }
 
     @Override

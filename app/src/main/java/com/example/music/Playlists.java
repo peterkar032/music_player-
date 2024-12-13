@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,7 +19,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class Playlists extends Fragment {
 
@@ -37,11 +35,10 @@ public class Playlists extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         playlistList = new ArrayList<>();
-        playlistAdapter = new PlaylistAdapter(playlistList, getContext());
+        playlistAdapter = new PlaylistAdapter(playlistList, getContext(), playlist -> showTracksDialog(playlist));
         recyclerView.setAdapter(playlistAdapter);
 
         playlistsRef = FirebaseDatabase.getInstance().getReference("playlists");
-
 
         playlistsRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -50,20 +47,12 @@ public class Playlists extends Fragment {
                 for (DataSnapshot playlistSnapshot : snapshot.getChildren()) {
                     String playlistName = playlistSnapshot.getKey();
 
-
                     DataSnapshot tracksSnapshot = playlistSnapshot.child("tracks");
-                    int numberOfTracks = 0;
-
-                    if (tracksSnapshot.exists()) {
-
-                        numberOfTracks = (int) tracksSnapshot.getChildrenCount();
-                    }
+                    int numberOfTracks = tracksSnapshot.exists() ? (int) tracksSnapshot.getChildrenCount() : 0;
 
                     Playlist playlist = new Playlist(playlistName, numberOfTracks);
                     playlistList.add(playlist);
-
                 }
-
 
                 playlistAdapter.notifyDataSetChanged();
             }
@@ -76,5 +65,41 @@ public class Playlists extends Fragment {
 
         return view;
     }
-}
 
+    private void showTracksDialog(Playlist playlist) {
+        DatabaseReference tracksRef = playlistsRef.child(playlist.getName()).child("tracks");
+
+        tracksRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                List<Track> trackList = new ArrayList<>();
+                for (DataSnapshot trackSnapshot : snapshot.getChildren()) {
+                    Track track = trackSnapshot.getValue(Track.class);
+                    if (track != null) {
+                        trackList.add(track);
+                    }
+                }
+
+                androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(getContext());
+                builder.setTitle(playlist.getName() + " Tracks");
+
+
+                List<String> trackNames = new ArrayList<>();
+                for (Track track : trackList) {
+                    trackNames.add(track.getTitle() + " - " + track.getArtist());
+                }
+
+                CharSequence[] trackArray = trackNames.toArray(new CharSequence[0]);
+                builder.setItems(trackArray, null);
+
+                builder.setPositiveButton("Close", (dialog, which) -> dialog.dismiss());
+                builder.show();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(getContext(), "Error loading tracks: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+}
