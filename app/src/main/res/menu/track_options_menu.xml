@@ -6,5 +6,8 @@
     <item
         android:id="@+id/menu_unlike"
         android:title="Unlike" />
+    <item
+        android:id="@+id/menu_add_to_playlist"
+        android:title="Add to Playlist" />
 
 </menu>
