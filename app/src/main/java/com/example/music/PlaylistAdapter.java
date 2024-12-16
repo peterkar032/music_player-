@@ -1,7 +1,6 @@
 package com.example.music;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +18,8 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     private OnPlaylistClickListener onPlaylistClickListener;
 
     public interface OnPlaylistClickListener {
-        void onPlaylistClick(Playlist playlist);
+        void onPlaylistClick(Playlist playlist); // Εμφάνιση τραγουδιών
+        void onPlaylistLongClick(Playlist playlist); // Παρατεταμένο πάτημα
     }
 
     public PlaylistAdapter(List<Playlist> playlistList, Context context, OnPlaylistClickListener onPlaylistClickListener) {
@@ -41,11 +41,19 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
         holder.playlistNameTextView.setText(currentPlaylist.getName());
         holder.trackCountTextView.setText(currentPlaylist.getNumberOfTracks() + " Tracks");
 
+        // Click Listener για εμφάνιση τραγουδιών
         holder.itemView.setOnClickListener(v -> {
-            Log.d("PlaylistAdapter", "Clicked on: " + currentPlaylist.getName());
             if (onPlaylistClickListener != null) {
                 onPlaylistClickListener.onPlaylistClick(currentPlaylist);
             }
+        });
+
+        // Long Click Listener για εμφάνιση επιλογής διαγραφής
+        holder.itemView.setOnLongClickListener(v -> {
+            if (onPlaylistClickListener != null) {
+                onPlaylistClickListener.onPlaylistLongClick(currentPlaylist);
+            }
+            return true;
         });
     }
 
