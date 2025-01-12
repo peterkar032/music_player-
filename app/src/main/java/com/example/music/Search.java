@@ -3,6 +3,7 @@ package com.example.music;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import androidx.fragment.app.Fragment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,6 +15,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.media.MediaPlayer;
@@ -44,6 +46,8 @@ public class Search extends Fragment {
     private EditText searchEditText;
     private MediaPlayer mediaPlayer;
     private Button playPauseButton;
+    private SeekBar seekBar;
+    private Handler handler;
 
     @Nullable
     @Override
@@ -57,6 +61,7 @@ public class Search extends Fragment {
         searchEditText = view.findViewById(R.id.searchEditText);
         Button searchButton = view.findViewById(R.id.searchButton);
         playPauseButton = view.findViewById(R.id.PlayPauseButton);
+        seekBar = view.findViewById(R.id.seekBar3);
 
         // Initialize RecyclerView and adapter
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -68,8 +73,7 @@ public class Search extends Fragment {
                 displayTrackDetails(view, track);
                 playTrack(track);
             }
-        }, getContext()); // Προσθέσαμε την παράμετρο boolean
-
+        }, getContext()); // Pass the context to the adapter
 
         recyclerView.setAdapter(trackAdapter);
 
@@ -97,7 +101,28 @@ public class Search extends Fragment {
                 } else {
                     mediaPlayer.start();
                     playPauseButton.setText("Pause");
+                    startUpdatingSeekBar();  // Start updating the seekBar during playback
                 }
+            }
+        });
+
+        // Set up SeekBar listener to seek track
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && mediaPlayer != null) {
+                    mediaPlayer.seekTo(progress); // Move the track to the new position
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // No action needed
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // No action needed
             }
         });
 
@@ -157,7 +182,8 @@ public class Search extends Fragment {
             mediaPlayer.setOnPreparedListener(mp -> {
                 mp.start();
                 playPauseButton.setText("Pause");
-                Toast.makeText(getContext(), "Playing: " + track.getTitle() + " by " + track.getArtist(), Toast.LENGTH_SHORT).show();
+                seekBar.setMax(mp.getDuration());  // Set SeekBar maximum to song duration
+                startUpdatingSeekBar(); // Start updating the SeekBar during playback
             });
 
             mediaPlayer.setOnCompletionListener(mp -> {
@@ -174,6 +200,21 @@ public class Search extends Fragment {
             e.printStackTrace();
             Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    // Start updating the SeekBar while the track is playing
+    private void startUpdatingSeekBar() {
+        handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                    int currentPosition = mediaPlayer.getCurrentPosition();
+                    seekBar.setProgress(currentPosition);  // Update SeekBar position
+                    handler.postDelayed(this, 1000);  // Continue updating every second
+                }
+            }
+        }, 1000);
     }
 
     private void searchTracks(String query) {
@@ -223,6 +264,9 @@ public class Search extends Fragment {
         if (mediaPlayer != null) {
             mediaPlayer.release();
             mediaPlayer = null;
+        }
+        if (handler != null) {
+            handler.removeCallbacksAndMessages(null);  // Stop the SeekBar update
         }
     }
 }
