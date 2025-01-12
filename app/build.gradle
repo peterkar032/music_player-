@@ -4,6 +4,10 @@ plugins {
 }
 
 android {
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
     namespace 'com.example.music' // Make sure this matches your package structure
     compileSdk 34
 
@@ -59,4 +63,15 @@ dependencies {
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
+
+
+
+    // AndroidX Test dependencies για UI δοκιμές
+    androidTestImplementation 'androidx.test:core:1.5.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-intents:3.5.1'
+
+    // Robolectric για δοκιμές JVM (προαιρετικά)
+    testImplementation 'org.robolectric:robolectric:4.10.3'
 }
